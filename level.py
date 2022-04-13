@@ -26,8 +26,9 @@ class Level:
                     self.player.add(playerSprite) 
 
     def horizontalMoveCollision(self):
-        player = self.player.sprite   
-        player.hitbox.x += player.vel.x + 0.5 * player.acc.x
+        player = self.player.sprite
+        if abs(player.vel.x) > 0.5:   
+            player.hitbox.x += player.vel.x + 0.5 * player.acc.x
 
         for sprite in self.tiles.sprites():
             if sprite.rect.colliderect(player.hitbox):
@@ -36,8 +37,6 @@ class Level:
                 elif player.vel.x > 0:
                     player.hitbox.right = sprite.rect.left
         
-        
-    
     def verticalMoveCollision(self):
         player = self.player.sprite
         player.hitbox.y += player.vel.y + 0.5 * player.acc.y
@@ -58,6 +57,13 @@ class Level:
         if player.onCeilling and player.vel.y > 0:
             player.OnCeilling = False
 
+    def debug(self, info,y = 10, x = 10):
+        font = pygame.font.Font(None, 30)
+        debug_surf = font.render(str(info),True, 'White')
+        debug_rect = debug_surf.get_rect(topleft = (x, y))
+        pygame.draw.rect(self.displaySurface, 'Black', debug_rect)
+        self.displaySurface.blit(debug_surf, debug_rect)
+
     def run(self):
         #camera
         self.camera.update(self.player.sprite)
@@ -72,5 +78,6 @@ class Level:
         self.displaySurface.blit(self.player.sprite.image, self.camera.apply(self.player.sprite))
         self.horizontalMoveCollision()
         self.verticalMoveCollision()
+        self.debug(self.player.sprite.hitbox.x)
 
 

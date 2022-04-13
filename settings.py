@@ -1,6 +1,7 @@
 from os import walk
 import os, pygame
-def importFolder(path): #imports all the animations
+#Importing files
+def importFolder(path):
     surfaceList = []
     for _, __, imgFiles in walk(path):
         for image in imgFiles:
@@ -9,9 +10,7 @@ def importFolder(path): #imports all the animations
             surfaceList.append(imageSurface)
     return surfaceList
 
-
-        
-
+#Loading Stages
 def loadMap(path):
     f = open(path + '.txt', 'r')
     data = f.read()
@@ -23,12 +22,12 @@ def loadMap(path):
     return game_map
 STAGE = []
 STAGE.append(loadMap(os.path.join('Assets','first_stage')))
-
+#Screen Attributes
 FPS = 60 
 TILESIZE = 48 
 SCREENWIDTH = 500
 SCREENHEIGHT = 500
-
+#Player Attributes
 playerAcc = 0.5
 playerFric = - 0.12
 playerGrav = 0.5

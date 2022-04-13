@@ -36,8 +36,6 @@ class Player(pygame.sprite.Sprite):
         self.attackCD = 500
         self.attackTime = 0
 
-        
-
     def importCharacterAssets(self):
         characterPath = os.path.join('Assets','player1')
         self.animations = {'idle':[],'run':[],'jump':[],'fall':[],'blocking':[],'death':[],'hit':[],'attack':[]}
@@ -62,16 +60,6 @@ class Player(pygame.sprite.Sprite):
 
         #set the rect
         self.rect.midbottom = self.hitbox.midbottom
-        if self.onGround:
-            #self.rect = self.image.get_rect(midbottom = self.rect.midbottom)
-            self.canJump = True
-            self.secondJump = True
-        elif self.onCeilling:
-            #self.rect = self.image.get_rect(midtop = self.rect.midtop)
-            pass
-        else:
-            #self.rect = self.image.get_rect(center = self.rect.center)
-            pass
 
     def inputs(self):
         self.acc = vec(0, playerGrav)
@@ -79,9 +67,11 @@ class Player(pygame.sprite.Sprite):
         if keys[pygame.K_d]:
             self.acc.x = playerAcc
             self.facingRight = True
-        if keys[pygame.K_a]:
+        elif keys[pygame.K_a]:
             self.acc.x = -playerAcc
             self.facingRight = False
+        else:
+            self.acc.x = 0
         #apply friction
         self.acc.x += self.vel.x * playerFric
         #equations of motion
@@ -117,6 +107,7 @@ class Player(pygame.sprite.Sprite):
     
     def attack(self):
         pass
+
     def magic(self):
         pass
     
@@ -124,7 +115,7 @@ class Player(pygame.sprite.Sprite):
         self.vel.y = -10
     
     def update(self):
-        self.getStatus()
         self.inputs()
-        self.cooldowns()
+        self.getStatus()
         self.animate()
+        self.cooldowns()
