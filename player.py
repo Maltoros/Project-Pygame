@@ -1,6 +1,8 @@
 import pygame, os
-from settings import importFolder, playerAcc, playerFric, playerGrav
+from settings import SCREENHEIGHT, SCREENWIDTH, importFolder, playerAcc, playerFric, playerGrav
+from attack import Attack
 vec = pygame.math.Vector2
+SCREENCENTER = (SCREENWIDTH / 2, SCREENHEIGHT / 2)
 
 class Player(pygame.sprite.Sprite):
     def __init__(self, pos, surface):
@@ -13,7 +15,7 @@ class Player(pygame.sprite.Sprite):
         self.image = self.animations['idle'][self.frameIndex]
         self.rect = self.image.get_rect(topleft = pos)
         self.hitbox = pygame.Rect(pos - vec(25, -21), (10, 17))
-        
+
         #dust particles
         self.importDustParticles()
         self.dustFrameIndex = 0
@@ -34,6 +36,7 @@ class Player(pygame.sprite.Sprite):
         self.onRight = False
 
         #playerstats
+        self.attackType = Attack(self)
         self.hpMax = 10
         self.currHp = self.hpMax
         self.damage = 5
@@ -78,11 +81,11 @@ class Player(pygame.sprite.Sprite):
             
             dustParticle = self.dustRunParticles[int(self.dustFrameIndex)]
             if self.facingRight:
-                pos = self.hitbox.bottomleft
-                self.displaySurface.blit(dustParticle, (self.hitbox.x , self.hitbox.y - 120))
-            # else:
-            #     flippedImage = pygame.transform.flip(dustParticle, True, False)
-            #     self.image = flippedImage
+                self.displaySurface.blit(pygame.transform.scale(dustParticle, (5,5)), (SCREENCENTER + vec(-10, 3)))
+            else:
+                flippedImage = pygame.transform.flip(dustParticle, True, False)
+                self.displaySurface.blit(pygame.transform.scale(flippedImage , (5, 5)), (SCREENCENTER + vec(5, 3)))
+
     def inputs(self):
         self.acc = vec(0, playerGrav)
         keys = pygame.key.get_pressed()
@@ -102,7 +105,6 @@ class Player(pygame.sprite.Sprite):
         if keys[pygame.K_j] and not self.attacking:
             self.attacking = True
             self.attackTime = pygame.time.get_ticks()
-            self.attack()
 
         if keys[pygame.K_k] and not self.attacking:
             self.magic()                    
@@ -126,9 +128,6 @@ class Player(pygame.sprite.Sprite):
         if self.attacking:
             if currentTime - self.attackTime >= self.attackCD:
                 self.attacking = False
-    
-    def attack(self):
-        pass
 
     def magic(self):
         pass
@@ -147,3 +146,5 @@ class Player(pygame.sprite.Sprite):
         self.animate()
         self.runDustAnimate()
         self.cooldowns()
+        self.attackType.update()
+

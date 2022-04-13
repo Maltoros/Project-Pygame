@@ -9,15 +9,14 @@ class Game:
         pygame.mixer.init()
         self.clock = pygame.time.Clock()
         pygame.display.set_caption('Metroidvania final project')
-        self.displayWindow = pygame.display.set_mode((SCREENWIDTH*2 + 300, SCREENHEIGHT*2))
-        self.screen = pygame.Surface((SCREENWIDTH+300, SCREENHEIGHT))
+        self.displayWindow = pygame.display.set_mode((SCREENWIDTH*2, SCREENHEIGHT*2))
+        self.screen = pygame.Surface((SCREENWIDTH, SCREENHEIGHT))
         self.running = True
         self.level = Level(STAGE[0], self.screen)
         self.level.setupLevel(STAGE[0])
 
 
     def new(self):
-        self.allSprite = pygame.sprite.Group()
         self.run()
 
     def run(self):
@@ -25,11 +24,7 @@ class Game:
         while self.playing:
             self.clock.tick(FPS)
             self.events()
-            self.update()
             self.draw()
-
-    def update(self):
-        self.allSprite.update()
 
     def events(self):
         player = self.level.player.sprite
@@ -43,7 +38,6 @@ class Game:
                     player.jump()
 
     def draw(self):
-        self.screen.fill('black')
         self.level.run() 
         self.displayWindow.blit(pygame.transform.scale(self.screen, self.displayWindow.get_size()), (0,0))
         pygame.display.update()

@@ -33,8 +33,8 @@ STAGE.append(loadMap(os.path.join('Assets','first_stage')))
 #Screen Attributes
 FPS = 60 
 TILESIZE = 48 
-SCREENWIDTH = 500
-SCREENHEIGHT = 500
+SCREENWIDTH = 600
+SCREENHEIGHT = 400
 #Player Attributes
 playerAcc = 0.5
 playerFric = - 0.12

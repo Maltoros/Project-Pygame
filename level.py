@@ -24,6 +24,9 @@ class Level:
                 if cell == 'P':
                     playerSprite = Player((x, y), self.displaySurface)
                     self.player.add(playerSprite) 
+                if cell == 'D':
+                    self.dummyRect = pygame.Rect((x, y), (20, 20))
+                    
 
     def horizontalMoveCollision(self):
         player = self.player.sprite
@@ -57,20 +60,26 @@ class Level:
             player.onGround = False
         if player.onCeilling and player.vel.y > 0:
             player.OnCeilling = False
+    
+    def checkCollision(self):
+        attackHitbox = self.player.attackType.dmgHitboxes
+        if attackHitbox != None:
+            for sprite in attackHitbox:
+                if sprite.rect.colliderect(self.dummyRect):
+                    print('bite')
 
     def run(self):
+        self.displaySurface.fill((128, 115, 112))
         #camera
         self.camera.update(self.player.sprite)
 
         #level tiles
         for sprite in self.tiles:
             self.displaySurface.blit(sprite.image, self.camera.apply(sprite))
-
+        pygame.draw.rect(self.displaySurface, 'white', self.dummyRect)
         #player
         #self.createAttackHitbox()
         self.player.update()
         self.displaySurface.blit(self.player.sprite.image, self.camera.apply(self.player.sprite))
         self.horizontalMoveCollision()
         self.verticalMoveCollision()
-        debug(self.displaySurface, self.player.sprite.hitbox.x)
-        debug(self.displaySurface, self.player.sprite.rect.x, 10, 40)
