@@ -1,5 +1,13 @@
 from os import walk
 import os, pygame
+#Debugging
+def debug(surface, info , x = 10, y = 10):
+            font = pygame.font.Font(None, 30)
+            debug_surf = font.render(str(info),True, 'White')
+            debug_rect = debug_surf.get_rect(topleft = (x, y))
+            pygame.draw.rect(surface, 'Black', debug_rect)
+            surface.blit(debug_surf, debug_rect)
+
 #Importing files
 def importFolder(path):
     surfaceList = []

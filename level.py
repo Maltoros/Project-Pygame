@@ -1,7 +1,7 @@
 import pygame
 from tile import Tile
 from player import Player
-from settings import TILESIZE, SCREENWIDTH, SCREENHEIGHT
+from settings import TILESIZE, debug
 from camera import Camera
 
 class Level:
@@ -47,22 +47,16 @@ class Level:
                     player.hitbox.bottom = sprite.rect.top
                     player.vel.y = 0
                     player.onGround = True
+                    player.canJump, player.canDoubleJump = True, True
                 elif player.vel.y < 0:
                     player.hitbox.top = sprite.rect.bottom
                     player.vel.y = 0 
                     player.onCeilling = True
  
-        if player.onGround and player.vel.y < 0 or player.vel.y > 0:
+        if player.onGround and player.vel.y < 0 or player.vel.y > 1:
             player.onGround = False
         if player.onCeilling and player.vel.y > 0:
             player.OnCeilling = False
-
-    def debug(self, info,y = 10, x = 10):
-        font = pygame.font.Font(None, 30)
-        debug_surf = font.render(str(info),True, 'White')
-        debug_rect = debug_surf.get_rect(topleft = (x, y))
-        pygame.draw.rect(self.displaySurface, 'Black', debug_rect)
-        self.displaySurface.blit(debug_surf, debug_rect)
 
     def run(self):
         #camera
@@ -78,6 +72,5 @@ class Level:
         self.displaySurface.blit(self.player.sprite.image, self.camera.apply(self.player.sprite))
         self.horizontalMoveCollision()
         self.verticalMoveCollision()
-        self.debug(self.player.sprite.hitbox.x)
-
-
+        debug(self.displaySurface, self.player.sprite.hitbox.x)
+        debug(self.displaySurface, self.player.sprite.rect.x, 10, 40)

@@ -13,6 +13,11 @@ class Player(pygame.sprite.Sprite):
         self.image = self.animations['idle'][self.frameIndex]
         self.rect = self.image.get_rect(topleft = pos)
         self.hitbox = pygame.Rect(pos - vec(25, -21), (10, 17))
+        
+        #dust particles
+        self.importDustParticles()
+        self.dustFrameIndex = 0
+        self.dustAnimSpeed = 0.15
 
         #playermovement
         self.vel = vec(0, 0)
@@ -37,13 +42,16 @@ class Player(pygame.sprite.Sprite):
         self.attackTime = 0
 
     def importCharacterAssets(self):
-        characterPath = os.path.join('Assets','player1')
+        characterPath = os.path.join('Assets','player')
         self.animations = {'idle':[],'run':[],'jump':[],'fall':[],'blocking':[],'death':[],'hit':[],'attack':[]}
         
         for animation in self.animations.keys():
             fullPath = os.path.join(characterPath,animation)
             self.animations[animation] = importFolder(fullPath)
-    
+
+    def importDustParticles(self):
+        self.dustRunParticles = importFolder(os.path.join('Assets','player','dust_particles', 'run'))
+
     def animate(self):
         animation = self.animations[self.status]
         #loop over frame index
@@ -61,6 +69,20 @@ class Player(pygame.sprite.Sprite):
         #set the rect
         self.rect.midbottom = self.hitbox.midbottom
 
+    def runDustAnimate(self):
+        if self.status == 'run' and self.onGround:
+            #loop over frame index
+            self.dustFrameIndex += self.dustAnimSpeed
+            if self.dustFrameIndex >= len(self.dustRunParticles):
+                self.dustFrameIndex = 0
+            
+            dustParticle = self.dustRunParticles[int(self.dustFrameIndex)]
+            if self.facingRight:
+                pos = self.hitbox.bottomleft
+                self.displaySurface.blit(dustParticle, (self.hitbox.x , self.hitbox.y - 120))
+            # else:
+            #     flippedImage = pygame.transform.flip(dustParticle, True, False)
+            #     self.image = flippedImage
     def inputs(self):
         self.acc = vec(0, playerGrav)
         keys = pygame.key.get_pressed()
@@ -112,10 +134,16 @@ class Player(pygame.sprite.Sprite):
         pass
     
     def jump(self):
-        self.vel.y = -10
+        if self.canJump:
+            self.vel.y = -10
+            self.canJump = False
+        elif self.canDoubleJump:
+            self.vel.y = -10
+            self.canDoubleJump = False
     
     def update(self):
         self.inputs()
         self.getStatus()
         self.animate()
+        self.runDustAnimate()
         self.cooldowns()
