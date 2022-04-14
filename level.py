@@ -1,6 +1,8 @@
 import pygame
+from hitbox import AttackHitbox
 from tile import Tile
 from player import Player
+from enemy import Enemy
 from settings import TILESIZE, debug
 from camera import Camera
 
@@ -9,6 +11,7 @@ class Level:
         self.displaySurface = surface
         self.stage = stage
         self.tiles = pygame.sprite.Group()
+        self.enemies = pygame.sprite.Group()
         self.player = pygame.sprite.GroupSingle()
         self.worldShift = pygame.math.Vector2(0, 0)
         self.camera = Camera(len(self.stage[0])*TILESIZE, len(self.stage)*TILESIZE)
@@ -25,7 +28,8 @@ class Level:
                     playerSprite = Player((x, y), self.displaySurface)
                     self.player.add(playerSprite) 
                 if cell == 'D':
-                    self.dummyRect = pygame.Rect((x, y), (20, 20))
+                    enemySprite = Enemy((x, y))
+                    self.enemies.add(enemySprite)
                     
 
     def horizontalMoveCollision(self):
@@ -62,11 +66,14 @@ class Level:
             player.OnCeilling = False
     
     def checkCollision(self):
-        attackHitbox = self.player.attackType.dmgHitboxes
-        if attackHitbox != None:
-            for sprite in attackHitbox:
-                if sprite.rect.colliderect(self.dummyRect):
-                    print('bite')
+        attackHitboxes = self.player.sprite.attackHitboxes
+        if attackHitboxes:
+            for attackHitbox in attackHitboxes:
+                collisionSprite = pygame.sprite.spritecollide(attackHitbox, self.enemies, False)
+                print(collisionSprite)
+                if collisionSprite:
+                    for targetSprite in collisionSprite:
+                        targetSprite.kill()
 
     def run(self):
         self.displaySurface.fill((128, 115, 112))
@@ -76,10 +83,17 @@ class Level:
         #level tiles
         for sprite in self.tiles:
             self.displaySurface.blit(sprite.image, self.camera.apply(sprite))
-        pygame.draw.rect(self.displaySurface, 'white', self.dummyRect)
+        
+        #enemies
+        for sprite in self.enemies:
+            self.displaySurface.blit(sprite.image, self.camera.apply(sprite))
+
         #player
-        #self.createAttackHitbox()
         self.player.update()
         self.displaySurface.blit(self.player.sprite.image, self.camera.apply(self.player.sprite))
         self.horizontalMoveCollision()
         self.verticalMoveCollision()
+        self.checkCollision()
+        debug(self.displaySurface, self.player.sprite.attackHitboxes)
+        debug(self.displaySurface, self.player.sprite.rect.midbottom, 10, 30)
+        

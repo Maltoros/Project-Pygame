@@ -10,6 +10,6 @@ class Camera:
         return entity.rect.move(self.camera.topleft)
 
     def update(self, target):
-        x = - target.hitbox.centerx + int((SCREENWIDTH) / 2)
+        x = - target.hitbox.centerx + int(SCREENWIDTH / 2)
         y = - target.hitbox.centery + int(SCREENHEIGHT / 2)
         self.camera = pygame.Rect(x, y, self.width, self.height)

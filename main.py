@@ -9,7 +9,7 @@ class Game:
         pygame.mixer.init()
         self.clock = pygame.time.Clock()
         pygame.display.set_caption('Metroidvania final project')
-        self.displayWindow = pygame.display.set_mode((SCREENWIDTH*2, SCREENHEIGHT*2))
+        self.displayWindow = pygame.display.set_mode((SCREENWIDTH * 2, SCREENHEIGHT * 2))
         self.screen = pygame.Surface((SCREENWIDTH, SCREENHEIGHT))
         self.running = True
         self.level = Level(STAGE[0], self.screen)
@@ -36,7 +36,7 @@ class Game:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
                     player.jump()
-
+ 
     def draw(self):
         self.level.run() 
         self.displayWindow.blit(pygame.transform.scale(self.screen, self.displayWindow.get_size()), (0,0))
