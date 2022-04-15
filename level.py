@@ -3,9 +3,9 @@ from hitbox import AttackHitbox
 from tile import Tile
 from player import Player
 from enemy import Enemy
-from settings import TILESIZE, debug
+from settings import SCREENCENTER, TILESIZE, debug
 from camera import Camera
-
+rects = [pygame.Rect((0,0),(10, 7)) , pygame.Rect((0,0),(22, 27)) , pygame.Rect((0,0), (19, 15)), pygame.Rect((0,0), (14, 4))]
 class Level:
     def __init__(self, stage, surface):
         self.displaySurface = surface
@@ -28,53 +28,47 @@ class Level:
                     playerSprite = Player((x, y), self.displaySurface)
                     self.player.add(playerSprite) 
                 if cell == 'D':
-                    enemySprite = Enemy((x, y))
+                    enemySprite = Enemy((x, y), self.displaySurface)
                     self.enemies.add(enemySprite)
                     
 
-    def horizontalMoveCollision(self):
-        player = self.player.sprite
-        if abs(player.vel.x) > 0.5:   
-            player.hitbox.x += player.vel.x + 0.5 * player.acc.x
+    def horizontalMoveCollision(self, entity):
+        if abs(entity.vel.x) > 0.5:   
+            entity.hitbox.x += entity.vel.x + 0.5 * entity.acc.x
 
         for sprite in self.tiles.sprites():
-            if sprite.rect.colliderect(player.hitbox):
-                if player.vel.x < 0:
-                    player.hitbox.left = sprite.rect.right
-                elif player.vel.x > 0:
-                    player.hitbox.right = sprite.rect.left
+            if sprite.rect.colliderect(entity.hitbox):
+                if entity.vel.x < 0:
+                    entity.hitbox.left = sprite.rect.right
+                elif entity.vel.x > 0:
+                    entity.hitbox.right = sprite.rect.left
         
-    def verticalMoveCollision(self):
-        player = self.player.sprite
-        player.hitbox.y += player.vel.y + 0.5 * player.acc.y
+    def verticalMoveCollision(self, entity):
+        entity.hitbox.y += entity.vel.y + 0.5 * entity.acc.y
 
         for sprite in self.tiles.sprites():
-            if sprite.rect.colliderect(player.hitbox):
-                if player.vel.y > 0:
-                    player.hitbox.bottom = sprite.rect.top
-                    player.vel.y = 0
-                    player.onGround = True
-                    player.canJump, player.canDoubleJump = True, True
-                elif player.vel.y < 0:
-                    player.hitbox.top = sprite.rect.bottom
-                    player.vel.y = 0 
-                    player.onCeilling = True
+            if sprite.rect.colliderect(entity.hitbox):
+                if entity.vel.y > 0:
+                    entity.hitbox.bottom = sprite.rect.top
+                    entity.vel.y = 0
+                    entity.onGround = True
+                elif entity.vel.y < 0:
+                    entity.hitbox.top = sprite.rect.bottom
+                    entity.vel.y = 0 
+                    entity.onCeilling = True
  
-        if player.onGround and player.vel.y < 0 or player.vel.y > 1:
-            player.onGround = False
-        if player.onCeilling and player.vel.y > 0:
-            player.OnCeilling = False
+        if entity.onGround and entity.vel.y < 0 or entity.vel.y > 1:
+            entity.onGround = False
+        if entity.onCeilling and entity.vel.y > 0:
+            entity.OnCeilling = False
     
     def checkCollision(self):
         attackHitboxes = self.player.sprite.attackHitboxes
         if attackHitboxes:
             for attackHitbox in attackHitboxes:
-                collisionSprite = pygame.sprite.spritecollide(attackHitbox, self.enemies, False)
-                print(collisionSprite)
-                if collisionSprite:
-                    for targetSprite in collisionSprite:
-                        targetSprite.kill()
-
+                hitList = pygame.sprite.spritecollide(attackHitbox, self.enemies, False)
+                for enemyHit in hitList:
+                    enemyHit.kill()
     def run(self):
         self.displaySurface.fill((128, 115, 112))
         #camera
@@ -87,13 +81,21 @@ class Level:
         #enemies
         for sprite in self.enemies:
             self.displaySurface.blit(sprite.image, self.camera.apply(sprite))
+            self.horizontalMoveCollision(sprite)
+            self.verticalMoveCollision(sprite)
 
         #player
         self.player.update()
         self.displaySurface.blit(self.player.sprite.image, self.camera.apply(self.player.sprite))
-        self.horizontalMoveCollision()
-        self.verticalMoveCollision()
+        self.horizontalMoveCollision(self.player.sprite)
+        self.verticalMoveCollision(self.player.sprite)
         self.checkCollision()
+
+        #debugging
+        pygame.draw.rect(self.displaySurface, 'white', self.player.sprite.hitbox)
         debug(self.displaySurface, self.player.sprite.attackHitboxes)
-        debug(self.displaySurface, self.player.sprite.rect.midbottom, 10, 30)
+    
+        
+        
+        
         

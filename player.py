@@ -1,6 +1,6 @@
 import pygame, os
 from hitbox import AttackHitbox
-from settings import SCREENCENTER, importFolder, playerAcc, playerFric, playerGrav, attackAnimationsLeft, attackAnimationsRight
+from settings import *
 vec = pygame.math.Vector2
 
 
@@ -134,25 +134,25 @@ class Player(pygame.sprite.Sprite):
                 self.attackHitboxes.empty()
 
     def createAttackHitbox(self):
-        attackAnimationsRight = [0, 0, ( (SCREENCENTER + vec(-3, -22) ), (SCREENCENTER + vec(27, -10) ), (SCREENCENTER + vec(27, 0) ), (SCREENCENTER + vec(17, 5) ), (SCREENCENTER + vec(10, 5) ), (SCREENCENTER + vec(5, 5) ) ), ((SCREENCENTER + vec(7, 3) ), (SCREENCENTER + vec(20, -13) ), (SCREENCENTER + vec(24, -6) ), (SCREENCENTER + vec(20, 1) ), (SCREENCENTER + vec(6, 1) ) ), 0, 0 ]
-        attackAnimationsLeft = [0, 0, ( (SCREENCENTER + vec(3, -22) ), (SCREENCENTER + vec(-27, -10) ), (SCREENCENTER + vec(-27, 0) ), (SCREENCENTER + vec(-17, 5) ), (SCREENCENTER + vec(-10, 5) ) ), ( (SCREENCENTER + vec(-5, 5) ), (SCREENCENTER + vec(-7, 3) ), (SCREENCENTER + vec(-20, -13) ), (SCREENCENTER + vec(-24, -6) ), (SCREENCENTER + vec(-20, 1) ), (SCREENCENTER + vec(-6, 1) ) ), 0, 0]
-        
         if self.attacking:
             self.attackAnimationIndex += self.animationSpeed
 
             if self.facingRight:
-                attackRight = attackAnimationsRight[int(self.attackAnimationIndex)]
-                if 2 <= int(self.attackAnimationIndex) <= 3 :
-                    attackHitbox = AttackHitbox(pygame.draw.polygon(self.displaySurface, 'grey', attackRight))
-                    self.attackHitboxes.add(attackHitbox)
+                vec1, vec2, vec3 = vec(0, -14), vec(0, -5), vec(0, 3)
             else:
-                attackLeft = attackAnimationsLeft[int(self.attackAnimationIndex)]
-                if 2 <= int(self.attackAnimationIndex) <= 3 :
-                    attackHitbox = AttackHitbox(pygame.draw.polygon(self.displaySurface, 'grey', attackLeft))
-                    self.attackHitboxes.add(attackHitbox)
+                vec1, vec2, vec3 = vec(-25,-14), vec(-25, -5), vec(-25, 3)
+            attacks = attacksRects[int(self.attackAnimationIndex)]
+            if int(self.attackAnimationIndex) == 2:
+                attackHitbox = AttackHitbox(pygame.Rect(attacks), self.hitbox.center + vec1)
+                self.attackHitboxes.add(attackHitbox)
+            elif int(self.attackAnimationIndex) == 3:
+                attackHitbox = AttackHitbox(pygame.Rect(attacks), self.hitbox.center + vec2)
+                self.attackHitboxes.add(attackHitbox)
+            elif int(self.attackAnimationIndex) == 4:
+                attackHitbox = AttackHitbox(pygame.Rect(attacks), self.hitbox.center + vec3)
+                self.attackHitboxes.add(attackHitbox)
         else:
             self.attackAnimationIndex = 0
-
 
     def magic(self):
         pass
@@ -173,3 +173,5 @@ class Player(pygame.sprite.Sprite):
         self.cooldowns()
         self.createAttackHitbox()
 
+        if self.onGround:
+            self.canJump, self.canDoubleJump = True, True

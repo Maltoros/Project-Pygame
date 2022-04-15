@@ -36,7 +36,7 @@ class Game:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
                     player.jump()
- 
+
     def draw(self):
         self.level.run() 
         self.displayWindow.blit(pygame.transform.scale(self.screen, self.displayWindow.get_size()), (0,0))

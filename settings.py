@@ -41,5 +41,11 @@ SCREENCENTER = (SCREENWIDTH / 2, SCREENHEIGHT / 2)
 playerAcc = 0.5
 playerFric = - 0.12
 playerGrav = 0.5
+#PolygonAttacks
 attackAnimationsRight = [0, 0, ( (SCREENCENTER + vec(-3, -22) ), (SCREENCENTER + vec(27, -10) ), (SCREENCENTER + vec(27, 0) ), (SCREENCENTER + vec(17, 5) ), (SCREENCENTER + vec(10, 5) ), (SCREENCENTER + vec(5, 5) ) ), ((SCREENCENTER + vec(7, 3) ), (SCREENCENTER + vec(20, -13) ), (SCREENCENTER + vec(24, -6) ), (SCREENCENTER + vec(20, 1) ), (SCREENCENTER + vec(6, 1) ) ), 0, 0 ]
 attackAnimationsLeft = [0, 0, ( (SCREENCENTER + vec(3, -22) ), (SCREENCENTER + vec(-27, -10) ), (SCREENCENTER + vec(-27, 0) ), (SCREENCENTER + vec(-17, 5) ), (SCREENCENTER + vec(-10, 5) ) ), ( (SCREENCENTER + vec(-5, 5) ), (SCREENCENTER + vec(-7, 3) ), (SCREENCENTER + vec(-20, -13) ), (SCREENCENTER + vec(-24, -6) ), (SCREENCENTER + vec(-20, 1) ), (SCREENCENTER + vec(-6, 1) ) ), 0, 0]
+
+newAtkAnimRight = [0, 0, ((-3, -22), (27, -10), (27,0), (17,5), (10,5), (5,5)), ((7,3), (20,-13),(24, -6),(20, 1), (6, 1)), 0, 0]
+
+#RectAttacks
+attacksRects = [0, 0, ((0,0),(20, 24)) ,((0,0), (20, 15)), ((0,0), (20, 4)), 0]
