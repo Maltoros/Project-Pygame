@@ -1,11 +1,11 @@
 import pygame
-from hitbox import AttackHitbox
+from os import path
 from tile import Tile
 from player import Player
 from enemy import Enemy
-from settings import SCREENCENTER, TILESIZE, debug
+from settings import TILESIZE, debug
 from camera import Camera
-rects = [pygame.Rect((0,0),(10, 7)) , pygame.Rect((0,0),(22, 27)) , pygame.Rect((0,0), (19, 15)), pygame.Rect((0,0), (14, 4))]
+
 class Level:
     def __init__(self, stage, surface):
         self.displaySurface = surface
@@ -15,6 +15,7 @@ class Level:
         self.player = pygame.sprite.GroupSingle()
         self.worldShift = pygame.math.Vector2(0, 0)
         self.camera = Camera(len(self.stage[0])*TILESIZE, len(self.stage)*TILESIZE)
+        self.background = pygame.transform.scale(pygame.image.load(path.join('Assets','background','0.png')),(600, 400))
 
     def setupLevel(self, layout):
         for rowIndex, row in enumerate(layout):
@@ -22,13 +23,13 @@ class Level:
                 x = colIndex * TILESIZE
                 y = rowIndex * TILESIZE
                 if cell == '1':
-                    tile = Tile((x, y), TILESIZE)
+                    tile = Tile((x, y))
                     self.tiles.add(tile)
                 if cell == 'P':
                     playerSprite = Player((x, y), self.displaySurface)
                     self.player.add(playerSprite) 
-                if cell == 'D':
-                    enemySprite = Enemy((x, y), self.displaySurface)
+                if cell == 'G':
+                    enemySprite = Enemy((x, y), self.displaySurface, 'greendude')
                     self.enemies.add(enemySprite)
                     
 
@@ -66,11 +67,16 @@ class Level:
         attackHitboxes = self.player.sprite.attackHitboxes
         if attackHitboxes:
             for attackHitbox in attackHitboxes:
-                hitList = pygame.sprite.spritecollide(attackHitbox, self.enemies, False)
-                for enemyHit in hitList:
-                    enemyHit.kill()
+                # hitList = pygame.sprite.spritecollide(attackHitbox, self.enemies, False)
+                # for enemyHit in hitList:
+                #     enemyHit.kill()
+                for enemy in self.enemies:
+                    if attackHitbox.rect.colliderect(enemy.hitbox):
+                        enemy.kill()
+
     def run(self):
         self.displaySurface.fill((128, 115, 112))
+        self.displaySurface.blit(self.background, (0, 0))
         #camera
         self.camera.update(self.player.sprite)
 
@@ -80,6 +86,7 @@ class Level:
         
         #enemies
         for sprite in self.enemies:
+            sprite.update()
             self.displaySurface.blit(sprite.image, self.camera.apply(sprite))
             self.horizontalMoveCollision(sprite)
             self.verticalMoveCollision(sprite)
@@ -92,8 +99,7 @@ class Level:
         self.checkCollision()
 
         #debugging
-        pygame.draw.rect(self.displaySurface, 'white', self.player.sprite.hitbox)
-        debug(self.displaySurface, self.player.sprite.attackHitboxes)
+        
     
         
         

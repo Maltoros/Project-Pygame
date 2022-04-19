@@ -1,5 +1,6 @@
 from os import walk
 import os, pygame
+from csv import reader
 vec = pygame.math.Vector2
 #Debugging
 def debug(surface, info , x = 10, y = 10):
@@ -30,17 +31,19 @@ def loadMap(path):
         game_map.append(list(row))
     return game_map
 STAGE = []
-STAGE.append(loadMap(os.path.join('Assets','first_stage')))
+STAGE.append(loadMap(os.path.join('Assets','levels','first_stage')))
+
+
 #Screen Attributes
 FPS = 60 
-TILESIZE = 48 
+TILESIZE = 16
 SCREENWIDTH = 600
 SCREENHEIGHT = 400
 SCREENCENTER = (SCREENWIDTH / 2, SCREENHEIGHT / 2)
 #Player Attributes
-playerAcc = 0.5
-playerFric = - 0.12
-playerGrav = 0.5
+ACC = 0.5
+FRICTION = - 0.12
+GRAVITY = 0.5
 #PolygonAttacks
 attackAnimationsRight = [0, 0, ( (SCREENCENTER + vec(-3, -22) ), (SCREENCENTER + vec(27, -10) ), (SCREENCENTER + vec(27, 0) ), (SCREENCENTER + vec(17, 5) ), (SCREENCENTER + vec(10, 5) ), (SCREENCENTER + vec(5, 5) ) ), ((SCREENCENTER + vec(7, 3) ), (SCREENCENTER + vec(20, -13) ), (SCREENCENTER + vec(24, -6) ), (SCREENCENTER + vec(20, 1) ), (SCREENCENTER + vec(6, 1) ) ), 0, 0 ]
 attackAnimationsLeft = [0, 0, ( (SCREENCENTER + vec(3, -22) ), (SCREENCENTER + vec(-27, -10) ), (SCREENCENTER + vec(-27, 0) ), (SCREENCENTER + vec(-17, 5) ), (SCREENCENTER + vec(-10, 5) ) ), ( (SCREENCENTER + vec(-5, 5) ), (SCREENCENTER + vec(-7, 3) ), (SCREENCENTER + vec(-20, -13) ), (SCREENCENTER + vec(-24, -6) ), (SCREENCENTER + vec(-20, 1) ), (SCREENCENTER + vec(-6, 1) ) ), 0, 0]

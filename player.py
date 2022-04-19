@@ -14,7 +14,7 @@ class Player(pygame.sprite.Sprite):
         self.animationSpeed = 0.15
         self.image = self.animations['idle'][self.frameIndex]
         self.rect = self.image.get_rect(topleft = pos)
-        self.hitbox = pygame.Rect(pos - vec(25, -21), (10, 17))
+        self.hitbox = pygame.Rect(pos, (10, 17))
 
         #dust particles
         self.importDustParticles()
@@ -35,21 +35,19 @@ class Player(pygame.sprite.Sprite):
         self.onLeft = False
         self.onRight = False
 
-        #playerstats
-        self.hpMax = 10
-        self.currHp = self.hpMax
-        
-
         #playerattack
         self.attackAnimationIndex = 0
         self.attackHitboxes = pygame.sprite.Group()
         self.attacking = False
+        self.blocking = False
+        self.blockingCD = 500
+        self.blockingTime = 0
         self.attackCD = 500
         self.attackTime = 0
 
     def importCharacterAssets(self):
         characterPath = os.path.join('Assets','player')
-        self.animations = {'idle':[],'run':[],'jump':[],'fall':[],'blocking':[],'death':[],'hit':[],'attack':[]}
+        self.animations = {'idle':[],'run':[],'jump':[],'fall':[],'block':[],'death':[],'hit':[],'attack':[]}
         
         for animation in self.animations.keys():
             fullPath = os.path.join(characterPath,animation)
@@ -90,18 +88,20 @@ class Player(pygame.sprite.Sprite):
                 self.displaySurface.blit(pygame.transform.scale(flippedImage , (5, 5)), (SCREENCENTER + vec(5, 3)))
 
     def inputs(self):
-        self.acc = vec(0, playerGrav)
+        #apply gravity
+        self.acc = vec(0, GRAVITY)
         keys = pygame.key.get_pressed()
         if keys[pygame.K_d]:
-            self.acc.x = playerAcc
+            self.acc.x = ACC
             self.facingRight = True
         elif keys[pygame.K_a]:
-            self.acc.x = -playerAcc
+            self.acc.x = -ACC
             self.facingRight = False
         else:
             self.acc.x = 0
+            
         #apply friction
-        self.acc.x += self.vel.x * playerFric
+        self.acc.x += self.vel.x * FRICTION
         #equations of motion
         self.vel += self.acc
 
