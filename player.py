@@ -1,39 +1,23 @@
 import pygame, os
 from hitbox import AttackHitbox, MagicHitbox
 from settings import *
+from entity import Entity
 vec = pygame.math.Vector2
 
 
-class Player(pygame.sprite.Sprite):
+class Player(Entity):
     def __init__(self, pos, surface):
-        super().__init__()
+        super().__init__(surface)
+        
         #animation
-        self.displaySurface = surface
         self.importCharacterAssets()
-        self.frameIndex = 0
-        self.animationSpeed = 0.15
         self.image = self.animations['idle'][self.frameIndex]
         self.rect = self.image.get_rect(topleft = pos)
         self.hitbox = pygame.Rect(pos, (10, 17))
-
         #dust particles
         self.importDustParticles()
         self.dustFrameIndex = 0
         self.dustAnimSpeed = 0.15
-
-        #playermovement
-        self.vel = vec(0, 0)
-        self.acc = vec(0, 0)
-        self.canJump = True
-        self.canDoubleJump = True
-
-        #playerstatus
-        self.status = 'idle'
-        self.facingRight = True
-        self.onGround = False
-        self.onCeilling = False
-        self.onLeft = False
-        self.onRight = False
 
         #playerattack
         self.attackAnimationIndex = 0
@@ -66,23 +50,6 @@ class Player(pygame.sprite.Sprite):
 
     def importDustParticles(self):
         self.dustRunParticles = importFolder(os.path.join('Assets','player','dust_particles', 'run'))
-
-    def animate(self):
-        animation = self.animations[self.status]
-        #loop over frame index
-        self.frameIndex += self.animationSpeed
-        if self.frameIndex >= len(animation):
-            self.frameIndex = 0
-        
-        image = animation[int(self.frameIndex)]
-        if self.facingRight:
-            self.image = image
-        else:
-            flippedImage = pygame.transform.flip(image, True, False)
-            self.image = flippedImage
-
-        #set the rect
-        self.rect.midbottom = self.hitbox.midbottom
 
     def runDustAnimate(self):
         if self.status == 'run' and self.onGround:
@@ -119,40 +86,6 @@ class Player(pygame.sprite.Sprite):
         if keys[pygame.K_j] and not self.attacking:
             self.attacking = True
             self.attackTime = pygame.time.get_ticks()
-
-    def getStatus(self):
-        if self.attacking:
-            self.status = 'attack'
-        elif self.casting:
-            self.status = 'casting'
-        elif self.hit:
-            self.status = 'hit'
-        elif not self.alive:
-            self.status = 'death'
-            #morecode to end the game?
-        else:
-            if self.vel.y < 0:
-                self.status = 'jump'
-            elif self.vel.y > 1:
-                self.status = 'fall'
-            else:
-                if self.vel.x > 1 or self.vel.x < - 1:
-                    self.status = 'run'
-                else:
-                    self.status = 'idle'
-    
-    def cooldowns(self):
-        currentTime = pygame.time.get_ticks()
-        if self.attacking:
-            if currentTime - self.attackTime >= self.attackCD:
-                self.attacking = False
-                self.attackHitboxes.empty()
-        if self.casting:
-            if currentTime - self.castTime >= self.castCD:
-                self.casting = False
-        if self.hit:
-            if currentTime - self.hitTime >= self.iframesCD:
-                self.hit = False
 
     def createAttackHitbox(self):
         if self.attacking:
@@ -191,14 +124,6 @@ class Player(pygame.sprite.Sprite):
         elif self.canDoubleJump:
             self.vel.y = -10
             self.canDoubleJump = False
-    
-    def loseHP(self, damage):
-        if not self.hit and self.alive:
-            self.hitTime = pygame.time.get_ticks()
-            self.hp -= damage
-            if self.hp < 0:
-                self.alive = False
-            self.hit = True
 
     def update(self):
         if self.alive:
