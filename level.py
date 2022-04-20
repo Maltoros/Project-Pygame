@@ -1,5 +1,6 @@
 import pygame
 from os import path
+from hitbox import MagicHitbox
 from tile import Tile
 from player import Player
 from enemy import Enemy
@@ -31,7 +32,19 @@ class Level:
                 if cell == 'G':
                     enemySprite = Enemy((x, y), self.displaySurface, 'greendude')
                     self.enemies.add(enemySprite)
-                    
+
+    def playerUI(self):
+        player = self.player.sprite
+
+        life = pygame.Rect(10, 10, player.hp*7, 10)
+        lifeBg = pygame.Rect(9, 9, 72, 12)
+        pygame.draw.rect(self.displaySurface, 'black', lifeBg)
+        pygame.draw.rect(self.displaySurface, 'red', life)
+
+        mana = pygame.Rect(10, 25, player.mana*7, 10)
+        manaBg = pygame.Rect(9, 24, 65, 12)
+        pygame.draw.rect(self.displaySurface, 'black', manaBg)
+        pygame.draw.rect(self.displaySurface, 'blue', mana)   
 
     def horizontalMoveCollision(self, entity):
         if abs(entity.vel.x) > 0.5:   
@@ -65,6 +78,7 @@ class Level:
     
     def checkCollision(self):
         attackHitboxes = self.player.sprite.attackHitboxes
+        magicHitboxes = self.player.sprite.magicHitboxes
         if attackHitboxes:
             for attackHitbox in attackHitboxes:
                 # hitList = pygame.sprite.spritecollide(attackHitbox, self.enemies, False)
@@ -73,7 +87,16 @@ class Level:
                 for enemy in self.enemies:
                     if attackHitbox.rect.colliderect(enemy.hitbox):
                         enemy.kill()
-
+        if magicHitboxes:
+            for magicHitbox in magicHitboxes:
+                for enemy in self.enemies:
+                    if magicHitbox.rect.colliderect(enemy.hitbox):
+                        enemy.kill()
+                        magicHitbox.kill()
+        for enemy in self.enemies:
+            if self.player.sprite.hitbox.colliderect(enemy.hitbox):
+                self.player.sprite.loseHP(3)
+    
     def run(self):
         self.displaySurface.fill((128, 115, 112))
         self.displaySurface.blit(self.background, (0, 0))
@@ -97,8 +120,15 @@ class Level:
         self.horizontalMoveCollision(self.player.sprite)
         self.verticalMoveCollision(self.player.sprite)
         self.checkCollision()
-
+        self.playerUI()
+        #magic
+        for sprite in self.player.sprite.magicHitboxes:
+            sprite.update()
+            self.displaySurface.blit(sprite.image, self.camera.apply(sprite))
         #debugging
+        #debug(self.displaySurface, self.player.sprite.mana)
+        #debug(self.displaySurface, self.player.sprite.casting, y = 30)
+        #debug(self.displaySurface, self.player.sprite.status, y = 50)
         
     
         

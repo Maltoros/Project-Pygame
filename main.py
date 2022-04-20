@@ -36,6 +36,11 @@ class Game:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
                     player.jump()
+            if event.type == pygame.KEYUP:        
+                if event.key == pygame.K_k:
+                    if not player.attacking:
+                        player.magic()                
+            
 
     def draw(self):
         self.level.run() 

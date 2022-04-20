@@ -1,5 +1,5 @@
 import pygame, os
-from hitbox import AttackHitbox
+from hitbox import AttackHitbox, MagicHitbox
 from settings import *
 vec = pygame.math.Vector2
 
@@ -39,15 +39,26 @@ class Player(pygame.sprite.Sprite):
         self.attackAnimationIndex = 0
         self.attackHitboxes = pygame.sprite.Group()
         self.attacking = False
-        self.blocking = False
-        self.blockingCD = 500
-        self.blockingTime = 0
         self.attackCD = 500
         self.attackTime = 0
+        self.casting = False
+        self.castCD = 200
+        self.castTime = 0
+        self.magicHitboxes = pygame.sprite.Group()
+        
+        #playerstats
+        self.hp = 10
+        self.mana = 9
+        self.magicUnlock = True
+        self.damage = 5
+        self.alive = True
+        self.iframesCD = 500
+        self.hitTime = 0
+        self.hit = False
 
     def importCharacterAssets(self):
         characterPath = os.path.join('Assets','player')
-        self.animations = {'idle':[],'run':[],'jump':[],'fall':[],'block':[],'death':[],'hit':[],'attack':[]}
+        self.animations = {'idle':[],'run':[],'jump':[],'fall':[],'casting':[],'death':[],'hit':[],'attack':[]}
         
         for animation in self.animations.keys():
             fullPath = os.path.join(characterPath,animation)
@@ -109,12 +120,16 @@ class Player(pygame.sprite.Sprite):
             self.attacking = True
             self.attackTime = pygame.time.get_ticks()
 
-        if keys[pygame.K_k] and not self.attacking:
-            self.magic()                    
-
     def getStatus(self):
         if self.attacking:
             self.status = 'attack'
+        elif self.casting:
+            self.status = 'casting'
+        elif self.hit:
+            self.status = 'hit'
+        elif not self.alive:
+            self.status = 'death'
+            #morecode to end the game?
         else:
             if self.vel.y < 0:
                 self.status = 'jump'
@@ -132,6 +147,12 @@ class Player(pygame.sprite.Sprite):
             if currentTime - self.attackTime >= self.attackCD:
                 self.attacking = False
                 self.attackHitboxes.empty()
+        if self.casting:
+            if currentTime - self.castTime >= self.castCD:
+                self.casting = False
+        if self.hit:
+            if currentTime - self.hitTime >= self.iframesCD:
+                self.hit = False
 
     def createAttackHitbox(self):
         if self.attacking:
@@ -155,7 +176,13 @@ class Player(pygame.sprite.Sprite):
             self.attackAnimationIndex = 0
 
     def magic(self):
-        pass
+        if self.magicUnlock:
+            self.casting = True
+            self.castTime = pygame.time.get_ticks()  
+            if self.mana >= 3:
+                self.mana -= 3
+                magicHitbox = MagicHitbox(self.hitbox.center, self.facingRight)
+                self.magicHitboxes.add(magicHitbox)
     
     def jump(self):
         if self.canJump and self.onGround:
@@ -165,8 +192,17 @@ class Player(pygame.sprite.Sprite):
             self.vel.y = -10
             self.canDoubleJump = False
     
+    def loseHP(self, damage):
+        if not self.hit and self.alive:
+            self.hitTime = pygame.time.get_ticks()
+            self.hp -= damage
+            if self.hp < 0:
+                self.alive = False
+            self.hit = True
+
     def update(self):
-        self.inputs()
+        if self.alive:
+            self.inputs()
         self.getStatus()
         self.animate()
         self.runDustAnimate()
