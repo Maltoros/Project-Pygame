@@ -30,7 +30,7 @@ class Level:
                     playerSprite = Player((x, y), self.displaySurface)
                     self.player.add(playerSprite) 
                 if cell == 'G':
-                    enemySprite = Enemy((x, y), self.displaySurface, 'greendude')
+                    enemySprite = Enemy((x, y), self.displaySurface, 'greendude', self)
                     self.enemies.add(enemySprite)
 
     def playerUI(self):
@@ -77,25 +77,31 @@ class Level:
             entity.OnCeilling = False
     
     def checkCollision(self):
-        attackHitboxes = self.player.sprite.attackHitboxes
-        magicHitboxes = self.player.sprite.magicHitboxes
+        player = self.player.sprite
+        attackHitboxes = player.attackHitboxes
+        magicHitboxes = player.magicHitboxes
         if attackHitboxes:
             for attackHitbox in attackHitboxes:
-                # hitList = pygame.sprite.spritecollide(attackHitbox, self.enemies, False)
-                # for enemyHit in hitList:
-                #     enemyHit.kill()
                 for enemy in self.enemies:
                     if attackHitbox.rect.colliderect(enemy.hitbox):
-                        enemy.kill()
+                        enemy.loseHP(player.damage)
+
         if magicHitboxes:
             for magicHitbox in magicHitboxes:
                 for enemy in self.enemies:
                     if magicHitbox.rect.colliderect(enemy.hitbox):
-                        enemy.kill()
                         magicHitbox.kill()
+                        enemy.loseHP(player.magicDamage)
+
         for enemy in self.enemies:
-            if self.player.sprite.hitbox.colliderect(enemy.hitbox):
-                self.player.sprite.loseHP(3)
+            xOffset = player.hitbox.centerx - enemy.hitbox.centerx
+            if enemy.hit == False and enemy.alive:
+                if player.hitbox.colliderect(enemy.hitbox):
+                    player.loseHP(enemy.damage)
+                    if xOffset > 0:
+                        player.vel += pygame.math.Vector2(5, -2)
+                    else:
+                        player.vel += pygame.math.Vector2(-5, -2)
     
     def run(self):
         self.displaySurface.fill((128, 115, 112))
@@ -107,13 +113,6 @@ class Level:
         for sprite in self.tiles:
             self.displaySurface.blit(sprite.image, self.camera.apply(sprite))
         
-        #enemies
-        for sprite in self.enemies:
-            sprite.update()
-            self.displaySurface.blit(sprite.image, self.camera.apply(sprite))
-            self.horizontalMoveCollision(sprite)
-            self.verticalMoveCollision(sprite)
-
         #player
         self.player.update()
         self.displaySurface.blit(self.player.sprite.image, self.camera.apply(self.player.sprite))
@@ -121,15 +120,23 @@ class Level:
         self.verticalMoveCollision(self.player.sprite)
         self.checkCollision()
         self.playerUI()
+
         #magic
         for sprite in self.player.sprite.magicHitboxes:
             sprite.update()
             self.displaySurface.blit(sprite.image, self.camera.apply(sprite))
+
+        #enemies
+        for sprite in self.enemies:
+            debug(self.displaySurface, sprite.vel, x = 150, y = 70)
+            debug(self.displaySurface, sprite.acc, x = 150, y = 150)
+            sprite.update()
+            self.displaySurface.blit(sprite.image, self.camera.apply(sprite))
+            self.horizontalMoveCollision(sprite)
+            self.verticalMoveCollision(sprite)
+
         #debugging
-        #debug(self.displaySurface, self.player.sprite.mana)
-        #debug(self.displaySurface, self.player.sprite.casting, y = 30)
-        #debug(self.displaySurface, self.player.sprite.status, y = 50)
-        
+
     
         
         

@@ -37,29 +37,18 @@ class Entity(pygame.sprite.Sprite):
             self.image = flippedImage
 
         #set the rect
-        self.rect.midbottom = self.hitbox.midbottom
+        self.rect.midbottom = self.hitbox.midbottom    
+    
+    def jump(self):
+        if self.canJump and self.onGround:
+            self.vel.y = -10
+            self.canJump = False
+        elif self.canDoubleJump:
+            self.vel.y = -10
+            self.canDoubleJump = False
 
-    def getStatus(self):
-        if self.attacking:
-            self.status = 'attack'
-        elif self.casting:
-            self.status = 'casting'
-        elif self.hit:
-            self.status = 'hit'
-        elif not self.alive:
-            self.status = 'death'
-            #morecode to end the game?
-        else:
-            if self.vel.y < 0:
-                self.status = 'jump'
-            elif self.vel.y > 1:
-                self.status = 'fall'
-            else:
-                if self.vel.x > 1 or self.vel.x < - 1:
-                    self.status = 'run'
-                else:
-                    self.status = 'idle'
     def cooldowns(self):
+        self.hit = False
         currentTime = pygame.time.get_ticks()
         if self.attacking:
             if currentTime - self.attackTime >= self.attackCD:
@@ -68,14 +57,18 @@ class Entity(pygame.sprite.Sprite):
         if self.casting:
             if currentTime - self.castTime >= self.castCD:
                 self.casting = False
-        if self.hit:
-            if currentTime - self.hitTime >= self.iframesCD:
-                self.hit = False
+        if self.hasIFrames:
+            self.hit = False
+            if currentTime - self.hitTime >= self.iFramesCD:
+                self.hasIFrames = False
+
 
     def loseHP(self, damage):
-        if not self.hit and self.alive:
+        if not self.hasIFrames and self.alive:
+            self.hit = True 
+            self.hasIFrames = True
             self.hitTime = pygame.time.get_ticks()
             self.hp -= damage
-            if self.hp < 0:
+            if self.hp <= 0:
                 self.alive = False
-            self.hit = True
+        

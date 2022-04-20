@@ -3,7 +3,7 @@ import os, pygame
 from csv import reader
 vec = pygame.math.Vector2
 #Debugging
-def debug(surface, info , x = 10, y = 10):
+def debug(surface, info , x = 10, y = 40):
             font = pygame.font.Font(None, 30)
             debug_surf = font.render(str(info),True, 'White')
             debug_rect = debug_surf.get_rect(topleft = (x, y))

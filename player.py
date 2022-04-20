@@ -34,9 +34,11 @@ class Player(Entity):
         self.hp = 10
         self.mana = 9
         self.magicUnlock = True
-        self.damage = 5
+        self.damage = 3
+        self.magicDamage = 9
         self.alive = True
-        self.iframesCD = 500
+        self.hasIFrames = False
+        self.iFramesCD = 500
         self.hitTime = 0
         self.hit = False
 
@@ -83,30 +85,15 @@ class Player(Entity):
         #equations of motion
         self.vel += self.acc
 
-        if keys[pygame.K_j] and not self.attacking:
+        if keys[pygame.K_j] and not self.attacking and not self.hit:
             self.attacking = True
-            self.attackTime = pygame.time.get_ticks()
-
-    def createAttackHitbox(self):
-        if self.attacking:
-            self.attackAnimationIndex += self.animationSpeed
-
             if self.facingRight:
-                vec1, vec2, vec3 = vec(0, -14), vec(0, -5), vec(0, 3)
+                vec1 = vec(25, -28)
             else:
-                vec1, vec2, vec3 = vec(-25,-14), vec(-25, -5), vec(-25, 3)
-            attacks = attacksRects[int(self.attackAnimationIndex)]
-            if int(self.attackAnimationIndex) == 2:
-                attackHitbox = AttackHitbox(pygame.Rect(attacks), self.hitbox.center + vec1)
-                self.attackHitboxes.add(attackHitbox)
-            elif int(self.attackAnimationIndex) == 3:
-                attackHitbox = AttackHitbox(pygame.Rect(attacks), self.hitbox.center + vec2)
-                self.attackHitboxes.add(attackHitbox)
-            elif int(self.attackAnimationIndex) == 4:
-                attackHitbox = AttackHitbox(pygame.Rect(attacks), self.hitbox.center + vec3)
-                self.attackHitboxes.add(attackHitbox)
-        else:
-            self.attackAnimationIndex = 0
+                vec1 = vec(-25, -28)
+            attackHitbox = AttackHitbox(pygame.Rect((0, 0), (20, 28)), self.hitbox.midbottom + vec1)
+            self.attackHitboxes.add(attackHitbox)
+            self.attackTime = pygame.time.get_ticks()
 
     def magic(self):
         if self.magicUnlock:
@@ -117,13 +104,26 @@ class Player(Entity):
                 magicHitbox = MagicHitbox(self.hitbox.center, self.facingRight)
                 self.magicHitboxes.add(magicHitbox)
     
-    def jump(self):
-        if self.canJump and self.onGround:
-            self.vel.y = -10
-            self.canJump = False
-        elif self.canDoubleJump:
-            self.vel.y = -10
-            self.canDoubleJump = False
+    def getStatus(self):
+        if self.attacking:
+            self.status = 'attack'
+        elif self.casting:
+            self.status = 'casting'
+        elif self.hit:
+            self.status = 'hit'
+        elif not self.alive:
+            self.status = 'death'
+            #morecode to end the game?
+        else:
+            if self.vel.y < 0:
+                self.status = 'jump'
+            elif self.vel.y > 1:
+                self.status = 'fall'
+            else:
+                if self.vel.x > 1 or self.vel.x < - 1:
+                    self.status = 'run'
+                else:
+                    self.status = 'idle'
 
     def update(self):
         if self.alive:
@@ -132,7 +132,6 @@ class Player(Entity):
         self.animate()
         self.runDustAnimate()
         self.cooldowns()
-        self.createAttackHitbox()
 
         if self.onGround:
             self.canJump, self.canDoubleJump = True, True
