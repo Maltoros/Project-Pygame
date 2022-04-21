@@ -1,21 +1,17 @@
 import pygame
 from os import path
-from hitbox import MagicHitbox
 from tile import Tile
 from player import Player
 from enemy import Enemy
 from settings import TILESIZE, debug
-from camera import Camera
 
 class Level:
-    def __init__(self, stage, surface):
+    def __init__(self, surface):
         self.displaySurface = surface
-        self.stage = stage
         self.tiles = pygame.sprite.Group()
         self.enemies = pygame.sprite.Group()
         self.player = pygame.sprite.GroupSingle()
-        self.worldShift = pygame.math.Vector2(0, 0)
-        self.camera = Camera(len(self.stage[0])*TILESIZE, len(self.stage)*TILESIZE)
+        self.scrolling = pygame.math.Vector2(0, 0)
         self.background = pygame.transform.scale(pygame.image.load(path.join('Assets','background','0.png')),(600, 400))
 
     def setupLevel(self, layout):
@@ -103,19 +99,23 @@ class Level:
                     else:
                         player.vel += pygame.math.Vector2(-5, -2)
     
+    def worldscrolling(self):
+        self.scrolling.x += int(self.player.sprite.hitbox.centerx - self.scrolling.x - 305)
+        self.scrolling.y += int(self.player.sprite.hitbox.centery - self.scrolling.y - 208)
+    
     def run(self):
         self.displaySurface.fill((128, 115, 112))
         self.displaySurface.blit(self.background, (0, 0))
         #camera
-        self.camera.update(self.player.sprite)
+        self.worldscrolling()
 
         #level tiles
         for sprite in self.tiles:
-            self.displaySurface.blit(sprite.image, self.camera.apply(sprite))
+            sprite.drawing(self.displaySurface, self.scrolling)
         
         #player
         self.player.update()
-        self.displaySurface.blit(self.player.sprite.image, self.camera.apply(self.player.sprite))
+        self.player.sprite.drawing(self.displaySurface, self.scrolling)
         self.horizontalMoveCollision(self.player.sprite)
         self.verticalMoveCollision(self.player.sprite)
         self.checkCollision()
@@ -124,14 +124,14 @@ class Level:
         #magic
         for sprite in self.player.sprite.magicHitboxes:
             sprite.update()
-            self.displaySurface.blit(sprite.image, self.camera.apply(sprite))
+            sprite.drawing(self.displaySurface, self.scrolling)
 
         #enemies
         for sprite in self.enemies:
-            debug(self.displaySurface, sprite.vel, x = 150, y = 70)
+            debug(self.displaySurface, sprite.vel , x = 150, y = 70)
             debug(self.displaySurface, sprite.acc, x = 150, y = 150)
             sprite.update()
-            self.displaySurface.blit(sprite.image, self.camera.apply(sprite))
+            sprite.drawing(self.displaySurface, self.scrolling)
             self.horizontalMoveCollision(sprite)
             self.verticalMoveCollision(sprite)
 

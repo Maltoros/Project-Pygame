@@ -1,9 +1,8 @@
-import pygame, os
+import pygame
+from os import path
 from hitbox import AttackHitbox, MagicHitbox
-from settings import *
+from settings import GRAVITY, ACC, FRICTION, SCREENCENTER, importFolder
 from entity import Entity
-vec = pygame.math.Vector2
-
 
 class Player(Entity):
     def __init__(self, pos, surface):
@@ -14,17 +13,18 @@ class Player(Entity):
         self.image = self.animations['idle'][self.frameIndex]
         self.rect = self.image.get_rect(topleft = pos)
         self.hitbox = pygame.Rect(pos, (10, 17))
+
         #dust particles
         self.importDustParticles()
         self.dustFrameIndex = 0
         self.dustAnimSpeed = 0.15
 
         #playerattack
-        self.attackAnimationIndex = 0
         self.attackHitboxes = pygame.sprite.Group()
         self.attacking = False
         self.attackCD = 500
         self.attackTime = 0
+        #playermagic
         self.casting = False
         self.castCD = 200
         self.castTime = 0
@@ -36,22 +36,17 @@ class Player(Entity):
         self.magicUnlock = True
         self.damage = 3
         self.magicDamage = 9
-        self.alive = True
-        self.hasIFrames = False
-        self.iFramesCD = 500
-        self.hitTime = 0
-        self.hit = False
 
     def importCharacterAssets(self):
-        characterPath = os.path.join('Assets','player')
+        characterPath = path.join('Assets','player')
         self.animations = {'idle':[],'run':[],'jump':[],'fall':[],'casting':[],'death':[],'hit':[],'attack':[]}
         
         for animation in self.animations.keys():
-            fullPath = os.path.join(characterPath,animation)
+            fullPath = path.join(characterPath,animation)
             self.animations[animation] = importFolder(fullPath)
 
     def importDustParticles(self):
-        self.dustRunParticles = importFolder(os.path.join('Assets','player','dust_particles', 'run'))
+        self.dustRunParticles = importFolder(path.join('Assets','player','dust_particles', 'run'))
 
     def runDustAnimate(self):
         if self.status == 'run' and self.onGround:
@@ -62,14 +57,14 @@ class Player(Entity):
             
             dustParticle = self.dustRunParticles[int(self.dustFrameIndex)]
             if self.facingRight:
-                self.displaySurface.blit(pygame.transform.scale(dustParticle, (5,5)), (SCREENCENTER + vec(-10, 3)))
+                self.displaySurface.blit(pygame.transform.scale(dustParticle, (5,5)), (SCREENCENTER + pygame.math.Vector2(-7, 11)))
             else:
                 flippedImage = pygame.transform.flip(dustParticle, True, False)
-                self.displaySurface.blit(pygame.transform.scale(flippedImage , (5, 5)), (SCREENCENTER + vec(5, 3)))
+                self.displaySurface.blit(pygame.transform.scale(flippedImage , (5, 5)), (SCREENCENTER + pygame.math.Vector2(12, 11)))
 
     def inputs(self):
         #apply gravity
-        self.acc = vec(0, GRAVITY)
+        self.acc = pygame.math.Vector2(0, GRAVITY)
         keys = pygame.key.get_pressed()
         if keys[pygame.K_d]:
             self.acc.x = ACC
@@ -85,12 +80,13 @@ class Player(Entity):
         #equations of motion
         self.vel += self.acc
 
+        #creating attackhitboxes
         if keys[pygame.K_j] and not self.attacking and not self.hit:
             self.attacking = True
             if self.facingRight:
-                vec1 = vec(25, -28)
+                vec1 = pygame.math.Vector2(25, -28)
             else:
-                vec1 = vec(-25, -28)
+                vec1 = pygame.math.Vector2(-25, -28)
             attackHitbox = AttackHitbox(pygame.Rect((0, 0), (20, 28)), self.hitbox.midbottom + vec1)
             self.attackHitboxes.add(attackHitbox)
             self.attackTime = pygame.time.get_ticks()

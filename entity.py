@@ -1,5 +1,5 @@
 import pygame
-vec = pygame.math.Vector2
+
 class Entity(pygame.sprite.Sprite):
     def __init__(self, surface):
         super().__init__()
@@ -9,18 +9,25 @@ class Entity(pygame.sprite.Sprite):
         self.animationSpeed = 0.15
 
         #movement
-        self.vel = vec(0, 0)
-        self.acc = vec(0, 0)
+        self.vel = pygame.math.Vector2(0, 0)
+        self.acc = pygame.math.Vector2(0, 0)
         self.canJump = True
         self.canDoubleJump = True
 
-        #status
+        #status-animations
         self.status = 'idle'
         self.facingRight = True
         self.onGround = False
         self.onCeilling = False
         self.onLeft = False
         self.onRight = False
+
+        #status-gameplay
+        self.alive = True
+        self.hasIFrames = False
+        self.iFramesCD = 500
+        self.hitTime = 0
+        self.hit = False
 
     def animate(self):
         animation = self.animations[self.status]
@@ -71,4 +78,8 @@ class Entity(pygame.sprite.Sprite):
             self.hp -= damage
             if self.hp <= 0:
                 self.alive = False
-        
+
+    def drawing(self, surface, scrolling):
+        x = int(self.rect.x - scrolling.x)
+        y = int(self.rect.y - scrolling.y)
+        surface.blit(self.image, (x, y))

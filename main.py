@@ -1,5 +1,5 @@
 import pygame
-from settings  import *
+from settings  import SCREENWIDTH, SCREENHEIGHT, STAGE, FPS
 from level import Level
 
 
@@ -12,7 +12,7 @@ class Game:
         self.displayWindow = pygame.display.set_mode((SCREENWIDTH * 2, SCREENHEIGHT * 2))
         self.screen = pygame.Surface((SCREENWIDTH, SCREENHEIGHT))
         self.running = True
-        self.level = Level(STAGE[0], self.screen)
+        self.level = Level(self.screen)
         self.level.setupLevel(STAGE[0])
 
 

@@ -1,7 +1,9 @@
-import pygame, os
-from settings import *
+import pygame
+from os import path
+from settings import importFolder, GRAVITY, FRICTION
 from entity import Entity
-information = {'greendude':[(20, 31), 5, 0, 0.2], }#hitboxsize, hp, damage, speed
+information = {'greendude':{'size':(20, 31), 'hp':5, 'damage':0, 'speed':0.2},  }#hitboxsize, hp, damage, speed
+
 class Enemy(Entity):
     def __init__(self, pos, surface, monsterType, level):#groups => sprite group it should be part of
         super().__init__(surface)
@@ -13,38 +15,33 @@ class Enemy(Entity):
         self.importCharacterAssets()
         self.image = self.animations['idle'][self.frameIndex]
         self.rect = self.image.get_rect(topleft = pos)
-        self.hitbox = pygame.Rect(pos, information[self.archetype][0])
+        self.hitbox = pygame.Rect(pos, information[self.archetype]['size'])
 
         #movement
-        self.speed = information[self.archetype][3]
+        self.speed = information[self.archetype]['speed']
 
         #attack
         self.attackHitboxes = pygame.sprite.Group()
-        self.attackAnimationIndex = 0
         self.attacking = False
         self.attackCD = 500
         self.attackTime = 0
+        #magic
         self.casting = False
         self.castCD = 200
         self.castTime = 0
 
         #playerstats
-        self.hp = information[self.archetype][1]
+        self.hp = information[self.archetype]['hp']
         self.mana = 0
         self.magicUnlock = False
-        self.damage = information[self.archetype][2]
-        self.alive = True
-        self.hasIFrames = False
-        self.iFramesCD = 500
-        self.hitTime = 0
-        self.hit = False
+        self.damage = information[self.archetype]['damage']
 
     def importCharacterAssets(self):
-        characterPath = os.path.join('Assets','enemies', self.archetype)
+        characterPath = path.join('Assets','enemies', self.archetype)
         self.animations = {'idle':[],'run':[],'jump':[],'fall':[],'death':[],'attack':[]}
         
         for animation in self.animations.keys():
-            fullPath = os.path.join(characterPath,animation)
+            fullPath = path.join(characterPath,animation)
             self.animations[animation] = importFolder(fullPath)
 
     def animate(self):
@@ -85,13 +82,13 @@ class Enemy(Entity):
 
     def moving(self):
         #apply gravity
-        self.acc = vec(0, GRAVITY)
+        self.acc = pygame.math.Vector2(0, GRAVITY)
         player = self.level.player.sprite
         xOffset = player.hitbox.centerx - self.hitbox.centerx
         yOffset = player.hitbox.centery - self.hitbox.centery
         
         if self.alive:
-            if abs(xOffset) <= 200 and abs(yOffset) <= 200:
+            if abs(xOffset) <= 600 and abs(yOffset) <= 200:
                 self.aggro = True
             else:
                 self.aggro = False

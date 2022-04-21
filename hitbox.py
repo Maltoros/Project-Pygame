@@ -14,6 +14,11 @@ class MagicHitbox(pygame.sprite.Sprite):
         self.goingRight = facingRight
         self.velx = 10
 
+    def drawing(self, surface, scrolling):
+        x = int(self.rect.x - scrolling.x)
+        y = int(self.rect.y - scrolling.y)
+        surface.blit(self.image, (x, y))
+
     def update(self):
         if self.goingRight:
             self.rect.x += self.velx
