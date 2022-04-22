@@ -34,7 +34,7 @@ STAGE.append(loadMap(os.path.join('Assets','levels','first_stage')))
 
 
 #Screen Attributes
-FPS = 60 
+FPS = 60
 TILESIZE = 16
 SCREENWIDTH = 600
 SCREENHEIGHT = 400
@@ -43,4 +43,12 @@ SCREENCENTER = (SCREENWIDTH / 2, SCREENHEIGHT / 2)
 ACC = 0.5
 FRICTION = - 0.12
 GRAVITY = 0.5
+
+#enemies
+information = {
+    'greendude':{'size':(20, 31), 'hp':5, 'damage':3, 'speed':0.2,'mana':0, 'animations': {'idle':[],'run':[],'jump':[],'fall':[],'death':[],'attack':[]}},
+    'hunter':{'size':(17, 29), 'hp':3, 'damage':0, 'speed':0.25,'mana':0, 'animations': {'idle':[],'run':[],'jump':[],'fall':[],'death':[],'attack':[]}},
+    'summoner':{'size':(17, 29), 'hp':3, 'damage':2, 'speed':0.25,'mana':9, 'animations': {'idle':[],'run':[],'jump':[],'fall':[],'death':[],'casting':[]}},
+    'swarm':{'size':(17, 16), 'hp':3, 'damage':2, 'speed':0.2,'mana':0, 'animations': {'idle':[], 'moving':[]}},
+      }#hitboxsize, hp, damage, speed
 

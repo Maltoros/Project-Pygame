@@ -1,6 +1,7 @@
+from ctypes.wintypes import MAX_PATH
 import pygame
 from os import path
-from hitbox import AttackHitbox, MagicHitbox
+from hitbox import AttackHitbox, PlayerSpellHitbox
 from settings import GRAVITY, ACC, FRICTION, SCREENCENTER, importFolder
 from entity import Entity
 
@@ -21,19 +22,25 @@ class Player(Entity):
 
         #playerattack
         self.attackHitboxes = pygame.sprite.Group()
+        self.canAttack = True
         self.attacking = False
-        self.attackCD = 500
+        self.attackDuration = 500
+        self.attackCD = 1000
         self.attackTime = 0
         #playermagic
+        self.canCast = True
         self.casting = False
-        self.castCD = 200
+        self.castDuration = 200
+        self.castCD = 1000
         self.castTime = 0
-        self.magicHitboxes = pygame.sprite.Group()
-        
+        self.spellHitboxes = pygame.sprite.Group()
+
         #playerstats
-        self.hp = 10
-        self.mana = 9
-        self.magicUnlock = True
+        self.maxHp = 10
+        self.hp = self.maxHp
+        self.maxMana = 9
+        self.mana = self.maxMana
+        self.spellUnlock = False
         self.damage = 3
         self.magicDamage = 9
 
@@ -62,17 +69,53 @@ class Player(Entity):
                 flippedImage = pygame.transform.flip(dustParticle, True, False)
                 self.displaySurface.blit(pygame.transform.scale(flippedImage , (5, 5)), (SCREENCENTER + pygame.math.Vector2(12, 11)))
 
+    def cooldowns(self):
+        self.hit = False
+        currentTime = pygame.time.get_ticks()
+
+        if self.attacking:
+            self.canAttack = False
+            if currentTime - self.attackTime >= self.attackDuration:
+                self.attacking = False
+                self.attackHitboxes.empty()
+        
+        if not self.canAttack:
+            if currentTime - self.attackTime >= self.attackCD:
+                self.canAttack = True
+
+        if self.casting:
+            self.canCast = False
+            if currentTime - self.castTime >= self.castDuration:
+                self.casting = False
+
+        if not self.canCast:
+            if currentTime - self.castTime >= self.castCD:
+                self.canCast = True
+    
+
+        if self.hasIFrames:
+            self.hit = False
+            if currentTime - self.hitTime >= self.iFramesCD:
+                self.hasIFrames = False
+    
+
     def inputs(self):
         #apply gravity
         self.acc = pygame.math.Vector2(0, GRAVITY)
         keys = pygame.key.get_pressed()
         if keys[pygame.K_d]:
-            self.acc.x = ACC
-            self.facingRight = True
+            if not self.attacking and not self.casting:
+                self.acc.x = ACC
+                self.facingRight = True
+            else:
+                self.acc.x = ACC/2
         elif keys[pygame.K_a]:
-            self.acc.x = -ACC
-            self.facingRight = False
-        else:
+            if not self.attacking and not self.casting:
+                self.acc.x = -ACC
+                self.facingRight = False
+            else:
+                self.acc.x = -ACC/2
+        else:    
             self.acc.x = 0
             
         #apply friction
@@ -80,35 +123,34 @@ class Player(Entity):
         #equations of motion
         self.vel += self.acc
 
+    def attack(self):
+        self.attacking = True
+        self.attackTime = pygame.time.get_ticks()
+        if self.facingRight:
+            vec1 = pygame.math.Vector2(5, -28)
+        else:
+            vec1 = pygame.math.Vector2(-25, -28)
         #creating attackhitboxes
-        if keys[pygame.K_j] and not self.attacking and not self.hit:
-            self.attacking = True
-            if self.facingRight:
-                vec1 = pygame.math.Vector2(25, -28)
-            else:
-                vec1 = pygame.math.Vector2(-25, -28)
-            attackHitbox = AttackHitbox(pygame.Rect((0, 0), (20, 28)), self.hitbox.midbottom + vec1)
-            self.attackHitboxes.add(attackHitbox)
-            self.attackTime = pygame.time.get_ticks()
+        attackHitbox = AttackHitbox(pygame.Rect((0, 0), (20, 28)), self.hitbox.midbottom + vec1)
+        self.attackHitboxes.add(attackHitbox)
 
     def magic(self):
-        if self.magicUnlock:
+        if self.spellUnlock and self.mana >= 3:
             self.casting = True
             self.castTime = pygame.time.get_ticks()  
-            if self.mana >= 3:
-                self.mana -= 3
-                magicHitbox = MagicHitbox(self.hitbox.center, self.facingRight)
-                self.magicHitboxes.add(magicHitbox)
+            self.mana -= 3
+            spellHitbox = PlayerSpellHitbox(self.hitbox.center, self.facingRight, 'LaserBall')
+            self.spellHitboxes.add(spellHitbox)
     
     def getStatus(self):
-        if self.attacking:
+        if not self.alive:
+            self.status = 'death'
+        elif self.hit:
+            self.status = 'hit'
+        elif self.attacking:
             self.status = 'attack'
         elif self.casting:
             self.status = 'casting'
-        elif self.hit:
-            self.status = 'hit'
-        elif not self.alive:
-            self.status = 'death'
             #morecode to end the game?
         else:
             if self.vel.y < 0:
@@ -122,8 +164,7 @@ class Player(Entity):
                     self.status = 'idle'
 
     def update(self):
-        if self.alive:
-            self.inputs()
+        self.inputs()
         self.getStatus()
         self.animate()
         self.runDustAnimate()

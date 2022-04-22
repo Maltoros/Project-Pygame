@@ -33,13 +33,16 @@ class Game:
                 if self.playing:
                     self.playing = False
                 self.running = False
-            if event.type == pygame.KEYDOWN:
+            elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
                     player.jump()
-            if event.type == pygame.KEYUP:        
-                if event.key == pygame.K_k:
-                    if not player.attacking:
-                        player.magic()                
+            elif event.type == pygame.KEYUP:        
+                if event.key == pygame.K_j:
+                    if not player.attacking and not player.casting:
+                        player.attack()
+                elif event.key == pygame.K_k:
+                    if not player.attacking and not player.casting:              
+                        player.magic()   
             
 
     def draw(self):

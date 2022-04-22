@@ -1,4 +1,5 @@
 import pygame
+from random import randint
 
 class Entity(pygame.sprite.Sprite):
     def __init__(self, surface):
@@ -53,22 +54,6 @@ class Entity(pygame.sprite.Sprite):
         elif self.canDoubleJump:
             self.vel.y = -10
             self.canDoubleJump = False
-
-    def cooldowns(self):
-        self.hit = False
-        currentTime = pygame.time.get_ticks()
-        if self.attacking:
-            if currentTime - self.attackTime >= self.attackCD:
-                self.attacking = False
-                self.attackHitboxes.empty()
-        if self.casting:
-            if currentTime - self.castTime >= self.castCD:
-                self.casting = False
-        if self.hasIFrames:
-            self.hit = False
-            if currentTime - self.hitTime >= self.iFramesCD:
-                self.hasIFrames = False
-
 
     def loseHP(self, damage):
         if not self.hasIFrames and self.alive:
