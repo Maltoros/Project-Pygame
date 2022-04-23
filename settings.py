@@ -47,8 +47,38 @@ GRAVITY = 0.5
 #enemies
 information = {
     'greendude':{'size':(20, 31), 'hp':5, 'damage':3, 'speed':0.2,'mana':0, 'animations': {'idle':[],'run':[],'jump':[],'fall':[],'death':[],'attack':[]}},
-    'hunter':{'size':(17, 29), 'hp':3, 'damage':0, 'speed':0.25,'mana':0, 'animations': {'idle':[],'run':[],'jump':[],'fall':[],'death':[],'attack':[]}},
+    'hunter':{'size':(17, 29), 'hp':3, 'damage':3, 'speed':0.25,'mana':0, 'animations': {'idle':[],'run':[],'jump':[],'fall':[],'death':[],'attack':[]}},
     'summoner':{'size':(17, 29), 'hp':3, 'damage':2, 'speed':0.25,'mana':9, 'animations': {'idle':[],'run':[],'jump':[],'fall':[],'death':[],'casting':[]}},
     'swarm':{'size':(17, 16), 'hp':3, 'damage':2, 'speed':0.2,'mana':0, 'animations': {'idle':[], 'moving':[]}},
       }#hitboxsize, hp, damage, speed
-
+    
+items = {
+    'Big Life Potion':{
+        'image':'bigLifePotion',
+        'lifetime': 5000
+        },
+    'Medium Life Potion':{
+        'image':'mediumLifePotion',
+        'lifetime': 5000
+        },
+    'Small Life Potion':{
+        'image':'smallLifePotion',
+        'lifetime': False
+        },
+    'Big Mana Potion':{
+        'image':'bigManaPotion',
+        'lifetime': 5000
+        },
+    'Medium Mana Potion':{
+        'image':'mediumManaPotion',
+        'lifetime': 5000
+        },
+    'Small Mana Potion':{
+        'image':'smallManaPotion',
+        'lifetime': 5000
+        },
+    'Spell Unlock Potion':{
+        'image':'spellUnlockPotion',
+        'lifetime': False
+        },
+}

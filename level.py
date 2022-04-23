@@ -3,12 +3,14 @@ from os import path
 from tile import Tile
 from player import Player
 from enemy import Enemy
-from settings import TILESIZE, debug
+from item import Item
+from settings import SCREENCENTER, TILESIZE, debug
 
 class Level:
     def __init__(self, surface):
         self.displaySurface = surface
         self.tiles = pygame.sprite.Group()
+        self.items = pygame.sprite.Group()
         self.enemies = pygame.sprite.Group()
         self.player = pygame.sprite.GroupSingle()
         self.scrolling = pygame.math.Vector2(0, 0)
@@ -20,8 +22,14 @@ class Level:
                 x = colIndex * TILESIZE
                 y = rowIndex * TILESIZE
                 if cell == '1':
-                    tile = Tile((x, y))
+                    tile = Tile((x, y), self.displaySurface)
                     self.tiles.add(tile)
+                if cell == '2':
+                    tile = Tile((x, y), self.displaySurface, True)
+                    self.tiles.add(tile)
+                if cell == 'M':
+                    itemSprite = Item((x, y), 'Small Life Potion', self.displaySurface)
+                    self.items.add(itemSprite)
                 if cell == 'P':
                     playerSprite = Player((x, y), self.displaySurface)
                     self.player.add(playerSprite) 
@@ -90,17 +98,27 @@ class Level:
         spellHitboxes = player.spellHitboxes
 
         if attackHitboxes:
+            tilesHit = pygame.sprite.groupcollide(attackHitboxes, self.tiles, False, False)
+            for tileList in tilesHit.values():
+                for tile in tileList:
+                    if tile.breakable:
+                        tile.kill()
             for attackHitbox in attackHitboxes:
                 for enemy in self.enemies:
                     if attackHitbox.rect.colliderect(enemy.hitbox) and enemy.alive:
                         enemy.loseHP(player.damage)
 
         if spellHitboxes:
+            pygame.sprite.groupcollide(self.tiles, spellHitboxes, False, True)
             for spellHitbox in spellHitboxes:
                 for enemy in self.enemies:
                     if spellHitbox.rect.colliderect(enemy.hitbox) and enemy.alive:
                         spellHitbox.kill()
                         enemy.loseHP(player.magicDamage)
+        if self.items:
+            for item in self.items:
+                if player.hitbox.colliderect(item.rect):
+                    item.pickedUpBy(player)
 
         #enemies hitting the player
         for enemy in self.enemies:
@@ -123,7 +141,7 @@ class Level:
 
                 for specialAttack in enemy.specialAttackHitboxes:
                     if specialAttack.rect.colliderect(player.hitbox):
-                        player.loseHP(enemy.damage)
+                        player.loseHP(enemy.specialDamage)
                         specialAttack.kill()
 
     
@@ -138,35 +156,40 @@ class Level:
         self.worldscrolling()
 
         #level tiles
-        for sprite in self.tiles:
-            sprite.drawing(self.displaySurface, self.scrolling)
+        for tile in self.tiles:
+            tile.drawing(self.scrolling)
         
         #player
         self.player.update()
-        self.player.sprite.drawing(self.displaySurface, self.scrolling)
+        self.player.sprite.drawing(self.scrolling)
         self.horizontalMoveCollision(self.player.sprite)
         self.verticalMoveCollision(self.player.sprite)
         self.checkCollision()
         self.playerUI()
 
         #magic
-        for sprite in self.player.sprite.spellHitboxes:
-            sprite.update()
-            sprite.drawing(self.displaySurface, self.scrolling)
+        for spell in self.player.sprite.spellHitboxes:
+            spell.drawing(self.displaySurface, self.scrolling)
+            spell.update()
+
+        #items
+        for item in self.items:
+            item.drawing(self.scrolling)
+            item.update()
 
         #enemies
-        for sprite in self.enemies:
-            debug(self.displaySurface, sprite.rect.y, x=150, y = 30)
-            sprite.update()
-            sprite.drawing(self.displaySurface, self.scrolling)
-            self.horizontalMoveCollision(sprite)
-            self.verticalMoveCollision(sprite)
-            if sprite.specialAttackHitboxes:
-                for spell in sprite.specialAttackHitboxes:
+        for enemy in self.enemies:
+            debug(self.displaySurface, enemy.rect.y, x=150, y = 30)
+            enemy.update()
+            enemy.drawing(self.scrolling)
+            self.horizontalMoveCollision(enemy)
+            self.verticalMoveCollision(enemy)
+
+            if enemy.specialAttackHitboxes:
+                for spell in enemy.specialAttackHitboxes:
                     spell.drawing(self.displaySurface, self.scrolling)
                     spell.update()
 
-                    debug(self.displaySurface, spell.rect.y, x = 150, y = 0)
         #debugging
 
 

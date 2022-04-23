@@ -1,5 +1,6 @@
 import pygame
 from os import path
+from item import Item
 from settings import importFolder, GRAVITY, FRICTION, information
 from entity import Entity
 from hitbox import AttackHitbox, SwarmSpellHitbox
@@ -41,6 +42,10 @@ class Enemy(Entity):
         self.maxMana = information[self.archetype]['mana']
         self.mana = self.maxMana
         self.damage = information[self.archetype]['damage']
+        self.specialDamage = self.damage*2
+
+        #drops
+        self.rewardDropped = False
 
     def importCharacterAssets(self):
         characterPath = path.join('Assets','enemies', self.archetype)
@@ -95,18 +100,17 @@ class Enemy(Entity):
                         #hunter 
                         if self.archetype == 'hunter':
                             #attacking and creating hitbox when in 30pixels
-                            if abs(xOffset) < 30 and self.canAttack:
-                                self.attacking = True
+                            if abs(xOffset) < 30:
+                                self.acc.x = 0
+                            if abs(xOffset) < 40 and self.canAttack:
                                 self.attackTime = pygame.time.get_ticks()
+                                self.attacking = True
                                 if self.facingRight:
                                     vec1 = pygame.math.Vector2(8, -30)
                                 else:
                                     vec1 = pygame.math.Vector2(-25, -30)
                                 attackHitbox = AttackHitbox(pygame.Rect((0, 0), (24, 30)), self.hitbox.midbottom + vec1)
                                 self.attackHitboxes.add(attackHitbox)
-
-                            elif abs(xOffset) < 15 and abs(yOffset) < 15:
-                                self.acc.x = 0
 
                         elif self.archetype == 'greendude':
                             #uses colliding hitbox to damage the enemy
@@ -197,7 +201,23 @@ class Enemy(Entity):
             self.hit = False
             if currentTime - self.hitTime >= self.iFramesCD:
                 self.hasIFrames = False
-  
+
+    def dropReward(self):
+        if not self.rewardDropped:
+            self.rewardDropped = True
+            itemSprite = Item((self.rect.centerx, self.rect.centery), 'Spell Unlock Potion', self.displaySurface)
+            self.level.items.add(itemSprite)
+
+    def loseHP(self, damage):
+        if not self.hasIFrames and self.alive:
+            self.hit = True 
+            self.hasIFrames = True
+            self.hitTime = pygame.time.get_ticks()
+            self.hp -= damage
+            if self.hp <= 0:
+                self.alive = False
+                self.dropReward()
+
     def update(self):
         self.moving()
         self.getStatus()

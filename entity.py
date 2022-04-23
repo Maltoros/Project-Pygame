@@ -30,23 +30,6 @@ class Entity(pygame.sprite.Sprite):
         self.hitTime = 0
         self.hit = False
 
-    def animate(self):
-        animation = self.animations[self.status]
-        #loop over frame index
-        self.frameIndex += self.animationSpeed
-        if self.frameIndex >= len(animation):
-            self.frameIndex = 0
-        
-        image = animation[int(self.frameIndex)]
-        if self.facingRight:
-            self.image = image
-        else:
-            flippedImage = pygame.transform.flip(image, True, False)
-            self.image = flippedImage
-
-        #set the rect
-        self.rect.midbottom = self.hitbox.midbottom    
-    
     def jump(self):
         if self.canJump and self.onGround:
             self.vel.y = -10
@@ -64,7 +47,7 @@ class Entity(pygame.sprite.Sprite):
             if self.hp <= 0:
                 self.alive = False
 
-    def drawing(self, surface, scrolling):
+    def drawing(self, scrolling):
         x = int(self.rect.x - scrolling.x)
         y = int(self.rect.y - scrolling.y)
-        surface.blit(self.image, (x, y))
+        self.displaySurface.blit(self.image, (x, y))

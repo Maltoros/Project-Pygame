@@ -44,6 +44,9 @@ class Player(Entity):
         self.damage = 3
         self.magicDamage = 9
 
+        #gameStatus
+        self.gameOver = False
+
     def importCharacterAssets(self):
         characterPath = path.join('Assets','player')
         self.animations = {'idle':[],'run':[],'jump':[],'fall':[],'casting':[],'death':[],'hit':[],'attack':[]}
@@ -98,25 +101,45 @@ class Player(Entity):
             if currentTime - self.hitTime >= self.iFramesCD:
                 self.hasIFrames = False
     
+    def animate(self):
+        animation = self.animations[self.status]
+        #loop over frame index
+        self.frameIndex += self.animationSpeed
+        if self.frameIndex >= len(animation):
+            if not self.alive:
+                self.gameOver = True
+                return
+            self.frameIndex = 0
+        
+        image = animation[int(self.frameIndex)]
+        if self.facingRight:
+            self.image = image
+        else:
+            flippedImage = pygame.transform.flip(image, True, False)
+            self.image = flippedImage
 
+        #set the rect
+        self.rect.midbottom = self.hitbox.midbottom    
+    
     def inputs(self):
         #apply gravity
         self.acc = pygame.math.Vector2(0, GRAVITY)
         keys = pygame.key.get_pressed()
-        if keys[pygame.K_d]:
-            if not self.attacking and not self.casting:
-                self.acc.x = ACC
-                self.facingRight = True
-            else:
-                self.acc.x = ACC/2
-        elif keys[pygame.K_a]:
-            if not self.attacking and not self.casting:
-                self.acc.x = -ACC
-                self.facingRight = False
-            else:
-                self.acc.x = -ACC/2
-        else:    
-            self.acc.x = 0
+        if self.alive:
+            if keys[pygame.K_d]:
+                if not self.attacking and not self.casting:
+                    self.acc.x = ACC
+                    self.facingRight = True
+                else:
+                    self.acc.x = ACC/2
+            elif keys[pygame.K_a]:
+                if not self.attacking and not self.casting:
+                    self.acc.x = -ACC
+                    self.facingRight = False
+                else:
+                    self.acc.x = -ACC/2
+            else:    
+                self.acc.x = 0
             
         #apply friction
         self.acc.x += self.vel.x * FRICTION
@@ -129,9 +152,9 @@ class Player(Entity):
         if self.facingRight:
             vec1 = pygame.math.Vector2(5, -28)
         else:
-            vec1 = pygame.math.Vector2(-25, -28)
+            vec1 = pygame.math.Vector2(-30, -28)
         #creating attackhitboxes
-        attackHitbox = AttackHitbox(pygame.Rect((0, 0), (20, 28)), self.hitbox.midbottom + vec1)
+        attackHitbox = AttackHitbox(pygame.Rect((0, 0), (25, 38)), self.hitbox.midbottom + vec1)
         self.attackHitboxes.add(attackHitbox)
 
     def magic(self):
