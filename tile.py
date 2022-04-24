@@ -14,5 +14,17 @@ class Tile(pygame.sprite.Sprite):
         y = int(self.rect.y - scrolling.y)
         self.displaySurface.blit(self.image, (x, y))
 
+class TrapTile(Tile):
+    def __init__(self, pos, surface, breakable = False):
+        super().__init__(pos, surface, breakable)
+        self.image = pygame.image.load(path.join('Assets','tiles','spikeUp.png'))
+        self.damage = 3
+        self.hitbox = pygame.Rect(pos[0], pos[1]-5, 16, 11)
+
+class ExitLevel(Tile):
+   def __init__(self, pos, surface, breakable = False):
+        super().__init__(pos, surface, breakable)
+        self.image = pygame.image.load(path.join('Assets','tiles','leaveLevel.png'))
+         
 
 

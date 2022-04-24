@@ -11,6 +11,7 @@ class Item(pygame.sprite.Sprite):
         self.lifeTime = items[self.itemType]['lifetime']
         self.image = pygame.image.load(path.join('Assets','potions', items[itemType]['image']+'.png')).convert_alpha()
         self.rect = self.image.get_rect(center = pos)
+        self.onGround = False
     
     def pickedUpBy(self, player):
         print('acquired')
@@ -55,3 +56,5 @@ class Item(pygame.sprite.Sprite):
         if self.lifeTime:
             if currentTime - self.spawnTime >= self.lifeTime:
                 self.kill()
+        if not self.onGround:
+            self.rect.y += 1

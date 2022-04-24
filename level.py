@@ -1,6 +1,6 @@
 import pygame
 from os import path
-from tile import Tile
+from tile import ExitLevel, Tile, TrapTile
 from player import Player
 from enemy import Enemy
 from item import Item
@@ -10,6 +10,8 @@ class Level:
     def __init__(self, surface):
         self.displaySurface = surface
         self.tiles = pygame.sprite.Group()
+        self.levelEnd = pygame.sprite.Group()
+        self.traps = pygame.sprite.Group()
         self.items = pygame.sprite.Group()
         self.enemies = pygame.sprite.Group()
         self.player = pygame.sprite.GroupSingle()
@@ -27,8 +29,11 @@ class Level:
                 if cell == '2':
                     tile = Tile((x, y), self.displaySurface, True)
                     self.tiles.add(tile)
+                if cell == 'T':
+                    trap = TrapTile((x, y), self.displaySurface)
+                    self.traps.add(trap)
                 if cell == 'M':
-                    itemSprite = Item((x, y), 'Small Life Potion', self.displaySurface)
+                    itemSprite = Item((x, y), 'Spell Unlock Potion', self.displaySurface)
                     self.items.add(itemSprite)
                 if cell == 'P':
                     playerSprite = Player((x, y), self.displaySurface)
@@ -42,6 +47,9 @@ class Level:
                 if cell == 'S':
                     enemySprite = Enemy((x, y), self.displaySurface, 'summoner', self)
                     self.enemies.add(enemySprite)
+                if cell == 'L':
+                    levelEndTile = ExitLevel((x, y), self.displaySurface)
+                    self.levelEnd.add(levelEndTile)
 
     def playerUI(self):
         player = self.player.sprite
@@ -120,6 +128,16 @@ class Level:
                 if player.hitbox.colliderect(item.rect):
                     item.pickedUpBy(player)
 
+        #traps
+        for trap in self.traps:
+            if self.player.sprite.hitbox.colliderect(trap.hitbox):
+                self.player.sprite.loseHP(3)
+
+        #exit
+        for levelExit in self.levelEnd:
+            if self.player.sprite.hitbox.colliderect(levelExit.rect):
+                self.player.sprite.completedLevel = True
+
         #enemies hitting the player
         for enemy in self.enemies:
             xOffset = player.hitbox.centerx - enemy.hitbox.centerx
@@ -130,6 +148,7 @@ class Level:
                         player.vel += pygame.math.Vector2(5, -2)
                     else:
                         player.vel += pygame.math.Vector2(-5, -2)
+    
 
             if enemy.attackHitboxes:
                 for attack in enemy.attackHitboxes:
@@ -159,6 +178,12 @@ class Level:
         for tile in self.tiles:
             tile.drawing(self.scrolling)
         
+        for trap in self.traps:
+            trap.drawing(self.scrolling)
+
+        for exitTile in self.levelEnd:
+            exitTile.drawing(self.scrolling)
+
         #player
         self.player.update()
         self.player.sprite.drawing(self.scrolling)
@@ -176,10 +201,11 @@ class Level:
         for item in self.items:
             item.drawing(self.scrolling)
             item.update()
+            if pygame.sprite.spritecollide(item, self.tiles, False):
+                item.onGround = True
 
         #enemies
         for enemy in self.enemies:
-            debug(self.displaySurface, enemy.rect.y, x=150, y = 30)
             enemy.update()
             enemy.drawing(self.scrolling)
             self.horizontalMoveCollision(enemy)
@@ -191,7 +217,7 @@ class Level:
                     spell.update()
 
         #debugging
-
+        debug(self.displaySurface, self.player.sprite.completedLevel, x=150, y = 30)
 
     
         

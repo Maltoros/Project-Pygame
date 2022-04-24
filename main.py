@@ -3,10 +3,7 @@ from os import path
 from settings  import SCREENWIDTH, SCREENHEIGHT, STAGE, FPS
 from level import Level
 
-#ADD % DROPS TO POTIONS ON ENEMIES
-#Maybe add gravity to the potions
-#Polish restart mechanic
-#Configure level transition
+#Add more interatacble : (switches, chests ?)
 #Make 1-2 more levels
 #Make boss fight (?)
 #Add Music and sound effects
@@ -17,20 +14,28 @@ class Game:
         pygame.init()
         pygame.font.init()
         pygame.mixer.init()
+
         self.clock = pygame.time.Clock()
         pygame.display.set_caption('Metroidvania final project')
         self.displayWindow = pygame.display.set_mode((SCREENWIDTH * 2, SCREENHEIGHT * 2))
         self.screen = pygame.Surface((SCREENWIDTH, SCREENHEIGHT))
         self.running = True
         self.playing = False
+        self.status = 'main menu'
+
+        self.transitionTime = 0
+        self.inTransition = False
+        self.currentLevel = 0
+
         self.level = Level(self.screen)
-        self.level.setupLevel(STAGE[0])
+        self.level.setupLevel(STAGE[self.currentLevel])
         self.font = pygame.font.Font(path.join('Assets','font','Silver.ttf'), 30)
         self.buttonColor = 'white'
     
-    def newLevel(self):
+    def loadLevel(self):
         self.level = Level(self.screen)
-        self.level.setupLevel(STAGE[0])
+        self.level.setupLevel(STAGE[self.currentLevel])
+
     def runLevel(self): 
         self.level.run() 
         self.drawLevel()
@@ -108,15 +113,16 @@ class Game:
         pygame.display.update()
     
     def drawGameOverScreen(self):
+        self.currentLevel = 0
         pos = list(pygame.mouse.get_pos())
         scaledPos = (pos[0] / 2, pos[1] / 2)
-
+        gameOverRect = pygame.Rect(200, 100, 200, 50)
         newGameButton = pygame.Rect(200, 200, 200, 50)
         quitGameButton = pygame.Rect(200, 300, 200, 50)
         if newGameButton.collidepoint((scaledPos)):
             newGameButtonColor = 'grey'
             if self.click:
-                self.newLevel()
+                self.loadLevel()
                 self.playing = True
         else:
             newGameButtonColor = self.buttonColor
@@ -126,27 +132,56 @@ class Game:
                 self.running = False
         else:
             quitGameButtonColor = self.buttonColor
-
+        pygame.draw.rect(self.screen, 'white', gameOverRect)
+        self.drawText('GAME OVER', self.font, 'Black', self.screen, gameOverRect.x + 30, gameOverRect.y + 15)
         pygame.draw.rect(self.screen, newGameButtonColor, newGameButton)
-        self.drawText('New Game', self.font, 'black', self.screen, newGameButton.x + 30, newGameButton.y + 15)
+        self.drawText('Try Again', self.font, 'black', self.screen, newGameButton.x + 30, newGameButton.y + 15)
         pygame.draw.rect(self.screen, quitGameButtonColor, quitGameButton)
         self.drawText('Quit Game', self.font, 'black', self.screen, quitGameButton.x + 30, quitGameButton.y + 15)
         self.displayWindow.blit(pygame.transform.scale(self.screen, self.displayWindow.get_size()), (0, 0))
         pygame.display.update()
+
+    def drawTransitionScreen(self):
+        currentTime = pygame.time.get_ticks()
+        if currentTime - self.transitionTime >= 1000 and self.inTransition:
+            self.currentLevel += 1
+            self.loadLevel()
+            self.level.player.sprite.completedLevel = False
+            self.inTransition = False
+        self.screen.fill((0, 0, 0))
+        self.drawText('Metroidvania Project', self.font, 'white', self.screen, 200, 100)
+        self.drawText('Level Transition', self.font, 'white', self.screen, 200, 300)
+        self.displayWindow.blit(pygame.transform.scale(self.screen, self.displayWindow.get_size()), (0, 0))
+        pygame.display.update()
+    
+    def gameStatus(self):
+        if not self.playing:
+            self.status = 'main menu'
+            return self.mainMenu()
+        else:
+            if self.level.player.sprite.completedLevel:
+                self.status = 'transition'
+                if not self.inTransition:
+                    self.transitionTime = pygame.time.get_ticks()
+                    self.inTransition = True
+                return self.drawTransitionScreen()
+            if not self.level.player.sprite.gameOver:
+                self.status = 'playing'
+                return self.runLevel()
+            else:
+                self.status = 'game over'
+                return self.drawGameOverScreen()
+            
+
+
 
     def run(self):
         while self.running:
             self.click = False
             self.clock.tick(FPS)
             self.events()
-            if not self.playing:
-                self.mainMenu()
-            elif not self.level.player.sprite.gameOver:
-                pygame.mouse.set_visible(False)
-                self.runLevel()
-            else:
-                pygame.mouse.set_visible(True)
-                self.drawGameOverScreen()
+            self.gameStatus()
+            
 
 
 if __name__ == "__main__":

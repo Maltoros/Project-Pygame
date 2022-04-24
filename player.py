@@ -46,6 +46,7 @@ class Player(Entity):
 
         #gameStatus
         self.gameOver = False
+        self.completedLevel = False
 
     def importCharacterAssets(self):
         characterPath = path.join('Assets','player')

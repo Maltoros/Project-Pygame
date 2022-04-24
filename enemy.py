@@ -1,7 +1,8 @@
 import pygame
 from os import path
 from item import Item
-from settings import importFolder, GRAVITY, FRICTION, information
+from random import randint
+from settings import importFolder, GRAVITY, FRICTION, enemyInformation
 from entity import Entity
 from hitbox import AttackHitbox, SwarmSpellHitbox
 
@@ -15,10 +16,10 @@ class Enemy(Entity):
         self.importCharacterAssets()
         self.image = self.animations['idle'][self.frameIndex]
         self.rect = self.image.get_rect(topleft = pos)
-        self.hitbox = pygame.Rect(pos, information[self.archetype]['size'])
+        self.hitbox = pygame.Rect(pos, enemyInformation[self.archetype]['size'])
 
         #movement
-        self.monsterAcc = information[self.archetype]['speed']
+        self.monsterAcc = enemyInformation[self.archetype]['speed']
 
         #attack
         self.attackHitboxes = pygame.sprite.Group()
@@ -37,11 +38,11 @@ class Enemy(Entity):
 
         #stats
         self.aggro = False
-        self.maxHp = information[self.archetype]['hp']
+        self.maxHp = enemyInformation[self.archetype]['hp']
         self.hp = self.maxHp
-        self.maxMana = information[self.archetype]['mana']
+        self.maxMana = enemyInformation[self.archetype]['mana']
         self.mana = self.maxMana
-        self.damage = information[self.archetype]['damage']
+        self.damage = enemyInformation[self.archetype]['damage']
         self.specialDamage = self.damage*2
 
         #drops
@@ -49,7 +50,7 @@ class Enemy(Entity):
 
     def importCharacterAssets(self):
         characterPath = path.join('Assets','enemies', self.archetype)
-        self.animations = information[self.archetype]['animations']
+        self.animations = enemyInformation[self.archetype]['animations']
         
         for animation in self.animations.keys():
             fullPath = path.join(characterPath,animation)
@@ -205,8 +206,20 @@ class Enemy(Entity):
     def dropReward(self):
         if not self.rewardDropped:
             self.rewardDropped = True
-            itemSprite = Item((self.rect.centerx, self.rect.centery), 'Spell Unlock Potion', self.displaySurface)
-            self.level.items.add(itemSprite)
+            chance = randint(1,10)
+            if chance in enemyInformation[self.archetype]['chance']:
+                dropTable = ['Life Potion','Life Potion']
+                if self.level.player.sprite.spellUnlock and self.level.player.sprite.mana != self.level.player.sprite.maxMana:
+                    dropTable[1] = 'Mana Potion'
+                if chance == 10:
+                    reward = 'Big '
+                elif chance == 9:
+                    reward = 'Medium '
+                else:
+                    reward = 'Small '
+                reward += dropTable[randint(0,1)]
+                itemSprite = Item((self.rect.centerx, self.rect.centery), reward, self.displaySurface)
+                self.level.items.add(itemSprite)
 
     def loseHP(self, damage):
         if not self.hasIFrames and self.alive:

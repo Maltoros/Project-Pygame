@@ -31,6 +31,8 @@ def loadMap(path):
     return game_map
 STAGE = []
 STAGE.append(loadMap(os.path.join('Assets','levels','first_stage')))
+STAGE.append(loadMap(os.path.join('Assets','levels','second_stage')))
+STAGE.append(loadMap(os.path.join('Assets','levels','third_stage')))
 
 
 #Screen Attributes
@@ -45,13 +47,12 @@ FRICTION = - 0.12
 GRAVITY = 0.5
 
 #enemies
-information = {
-    'greendude':{'size':(20, 31), 'hp':5, 'damage':3, 'speed':0.2,'mana':0, 'animations': {'idle':[],'run':[],'jump':[],'fall':[],'death':[],'attack':[]}},
-    'hunter':{'size':(17, 29), 'hp':3, 'damage':3, 'speed':0.25,'mana':0, 'animations': {'idle':[],'run':[],'jump':[],'fall':[],'death':[],'attack':[]}},
-    'summoner':{'size':(17, 29), 'hp':3, 'damage':2, 'speed':0.25,'mana':9, 'animations': {'idle':[],'run':[],'jump':[],'fall':[],'death':[],'casting':[]}},
+enemyInformation = {
+    'greendude':{'size':(20, 31), 'hp':5, 'damage':3, 'speed':0.2,'mana':0,'chance':(8,9,10),'drops':['Small Life Potion','Medium Life Potion'], 'animations': {'idle':[],'run':[],'jump':[],'fall':[],'death':[],'attack':[]}},
+    'hunter':{'size':(17, 29), 'hp':3, 'damage':3, 'speed':0.25,'mana':0, 'chance':(7,8,9,10),'drops':['Small Life Potion','Medium Life Potion'], 'animations': {'idle':[],'run':[],'jump':[],'fall':[],'death':[],'attack':[]}},
+    'summoner':{'size':(17, 29), 'hp':3, 'damage':2, 'speed':0.25,'mana':9, 'chance':(6,7,8,9,10),'drops':['Small Life Potion','Medium Life Potion'], 'animations': {'idle':[],'run':[],'jump':[],'fall':[],'death':[],'casting':[]}},
     'swarm':{'size':(17, 16), 'hp':3, 'damage':2, 'speed':0.2,'mana':0, 'animations': {'idle':[], 'moving':[]}},
       }#hitboxsize, hp, damage, speed
-    
 items = {
     'Big Life Potion':{
         'image':'bigLifePotion',
@@ -63,7 +64,7 @@ items = {
         },
     'Small Life Potion':{
         'image':'smallLifePotion',
-        'lifetime': False
+        'lifetime': 5000
         },
     'Big Mana Potion':{
         'image':'bigManaPotion',
@@ -82,3 +83,4 @@ items = {
         'lifetime': False
         },
 }
+
