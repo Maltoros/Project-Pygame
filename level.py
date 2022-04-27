@@ -165,10 +165,10 @@ class Level:
                     if spellHitbox.rect.colliderect(enemy.hitbox) and enemy.alive:
                         spellHitbox.kill()
                         enemy.loseHP(player.magicDamage)
-            if self.boss:
-                    if spellHitbox.rect.colliderect(self.boss.sprite.hitbox) and self.boss.sprite.alive:
-                        spellHitbox.kill()
-                        self.boss.sprite.loseHP(player.magicDamage)
+                if self.boss:
+                        if spellHitbox.rect.colliderect(self.boss.sprite.hitbox) and self.boss.sprite.alive:
+                            spellHitbox.kill()
+                            self.boss.sprite.loseHP(player.magicDamage)
         if self.items:
             for item in self.items:
                 if player.hitbox.colliderect(item.rect):
@@ -208,13 +208,13 @@ class Level:
                     if specialAttack.rect.colliderect(player.hitbox):
                         player.loseHP(enemy.specialDamage)
                         specialAttack.kill()
+        if self.boss:
+            if self.boss.sprite.specialAttackHitboxes:
+                for specialAttack in self.boss.sprite.specialAttackHitboxes:
+                    if specialAttack.hitbox.colliderect(player.hitbox):
+                        player.loseHP(self.boss.sprite.specialDamage)
+                        specialAttack.kill()
 
-        if self.boss.sprite.specialAttackHitboxes:
-            for specialAttack in self.boss.sprite.specialAttackHitboxes:
-                if specialAttack.hitbox.colliderect(player.hitbox):
-                    player.loseHP(self.boss.sprite.specialDamage)
-                    specialAttack.kill()
-    
     def worldscrolling(self):
         self.scrolling.x += int(self.player.sprite.hitbox.centerx - self.scrolling.x - 305)
         self.scrolling.y += int(self.player.sprite.hitbox.centery - self.scrolling.y - 208)

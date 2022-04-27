@@ -156,6 +156,35 @@ class Game:
         self.displayWindow.blit(pygame.transform.scale(self.screen, self.displayWindow.get_size()), (0, 0))
         pygame.display.update()
     
+    def drawVictoryScreen(self):
+        pygame.mouse.set_visible(True)
+        pos = list(pygame.mouse.get_pos())
+        scaledPos = (pos[0] / 2, pos[1] / 2)
+        gameOverRect = pygame.Rect(200, 100, 200, 50)
+        newGameButton = pygame.Rect(200, 200, 200, 50)
+        quitGameButton = pygame.Rect(200, 300, 200, 50)
+        if newGameButton.collidepoint((scaledPos)):
+            newGameButtonColor = 'grey'
+            if self.click:
+                self.loadLevel()
+                self.playing = True
+        else:
+            newGameButtonColor = self.buttonColor
+        if quitGameButton.collidepoint((scaledPos)):
+            quitGameButtonColor = 'grey'
+            if self.click:
+                self.running = False
+        else:
+            quitGameButtonColor = self.buttonColor
+        pygame.draw.rect(self.screen, 'white', gameOverRect)
+        self.drawText('VICTORY', self.font, 'Black', self.screen, gameOverRect.x + 30, gameOverRect.y + 15)
+        pygame.draw.rect(self.screen, newGameButtonColor, newGameButton)
+        self.drawText('Play Again', self.font, 'black', self.screen, newGameButton.x + 30, newGameButton.y + 15)
+        pygame.draw.rect(self.screen, quitGameButtonColor, quitGameButton)
+        self.drawText('Quit Game', self.font, 'black', self.screen, quitGameButton.x + 30, quitGameButton.y + 15)
+        self.displayWindow.blit(pygame.transform.scale(self.screen, self.displayWindow.get_size()), (0, 0))
+        pygame.display.update() 
+
     def gameStatus(self):
         if not self.playing:
             self.status = 'main menu'
@@ -167,9 +196,13 @@ class Game:
                     self.transitionTime = pygame.time.get_ticks()
                     self.inTransition = True
                 return self.drawTransitionScreen()
+            if self.level.boss:
+                if self.level.boss.sprite.defeated:
+                    self.status = 'victory screen'
+                    return self.drawVictoryScreen()
 
             if not self.level.player.sprite.gameOver:
-                self.status = 'playing'
+                self.status = 'playing' 
                 return self.runLevel()
             else:
                 self.status = 'game over'

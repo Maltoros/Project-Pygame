@@ -30,9 +30,9 @@ def loadMap(path):
         game_map.append(list(row))
     return game_map
 STAGE = []
-STAGE.append(loadMap(os.path.join('Assets','levels','third_stage')))
 STAGE.append(loadMap(os.path.join('Assets','levels','first_stage')))
 STAGE.append(loadMap(os.path.join('Assets','levels','second_stage')))
+STAGE.append(loadMap(os.path.join('Assets','levels','third_stage')))
 
 
 #Screen Attributes

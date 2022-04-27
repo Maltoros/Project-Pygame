@@ -15,10 +15,10 @@ class Boss(pygame.sprite.Sprite):
         self.importCharacterAssets()
         self.image = self.animations['idle'][self.frameIndex]
         self.rect = self.image.get_rect(center = pos)
-        self.hitbox = pygame.Rect(pos, (60, 60))
+        self.hitbox = pygame.Rect((0,0), (40, 50))
         
         self.level = level
-
+        self.defeated = False
         #stats
         self.maxHp = 30
         self.hp = self.maxHp
@@ -62,7 +62,7 @@ class Boss(pygame.sprite.Sprite):
         self.frameIndex += self.animationSpeed
         if self.frameIndex >= len(animation):
             if not self.alive:
-                self.kill()
+                self.defeated = True
                 return
             self.frameIndex = 0
         
@@ -156,12 +156,13 @@ class Boss(pygame.sprite.Sprite):
         self.displaySurface.blit(self.image, (x, y))
     
     def update(self):
-        self.getStatus()
-        self.animate()
-        self.changePosition()
-        self.cooldowns()
-        if self.canSpecialAttack:
-            self.createSpecialAttackHitbox()
+        if not self.defeated:
+            self.getStatus()
+            self.animate()
+            self.changePosition()
+            self.cooldowns()
+            if self.canSpecialAttack:
+                self.createSpecialAttackHitbox()
 
 class BossSummon(pygame.sprite.Sprite):
     def __init__(self, spawnPosition, target):
