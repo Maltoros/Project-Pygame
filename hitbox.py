@@ -1,6 +1,8 @@
+from distutils.spawn import spawn
 import pygame
 from os import path
 from settings import importFolder
+
 class AttackHitbox(pygame.sprite.Sprite):
     def __init__(self, rect, attackerPos):
         super().__init__()
@@ -29,10 +31,11 @@ class PlayerSpellHitbox(pygame.sprite.Sprite):
         else:
             self.rect.x -= self.vel
 
-class SwarmSpellHitbox(pygame.sprite.Sprite):
-    def __init__(self, attackerPos, facingRight, targetCoord):
+class ProjectileSpellHitbox(pygame.sprite.Sprite):
+    def __init__(self, attackerPos, facingRight, targetCoord, spellName):
         super().__init__()
         #animation
+        self.spellName = spellName
         self.importSpellAssets()
         self.frameIndex = 0
         self.animationSpeed = 0.15
@@ -44,15 +47,13 @@ class SwarmSpellHitbox(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(center = attackerPos + pygame.math.Vector2(0, -40))
         self.target = targetCoord
 
-        self.spawnPosition = attackerPos + pygame.math.Vector2(0, -40)
         self.spawnCD = 300
         self.spawnTime = pygame.time.get_ticks()
-        self.canMove = False
 
         self.vel = 4
 
     def importSpellAssets(self):
-        characterPath = path.join('Assets','enemies', 'swarm')
+        characterPath = path.join('Assets','enemies', self.spellName)
         self.animations = {'idle':[],'moving':[]}
         
         for animation in self.animations.keys():
@@ -78,8 +79,6 @@ class SwarmSpellHitbox(pygame.sprite.Sprite):
             flippedImage = pygame.transform.flip(image, True, False)
             self.image = flippedImage
     
-    
-
     def moveTowardPlayer(self):
         if self.goingRight:
             self.rect.x += self.vel
@@ -94,14 +93,12 @@ class SwarmSpellHitbox(pygame.sprite.Sprite):
             elif self.target[1] > self.rect.y:
                 self.rect.y += self.vel/4
             
-
-
     def update(self):
         self.animate()
         currentTime = pygame.time.get_ticks()
 
         if currentTime - self.spawnTime >= self.spawnCD:
-            self.canMove = True
             self.status = 'moving'
-        if self.canMove:
             self.moveTowardPlayer()
+
+

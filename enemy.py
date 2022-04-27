@@ -4,7 +4,7 @@ from item import Item
 from random import randint
 from settings import importFolder, GRAVITY, FRICTION, enemyInformation
 from entity import Entity
-from hitbox import AttackHitbox, SwarmSpellHitbox
+from hitbox import AttackHitbox, ProjectileSpellHitbox
 
 class Enemy(Entity):
     def __init__(self, pos, surface, monsterType, level):#groups => sprite group it should be part of
@@ -152,7 +152,7 @@ class Enemy(Entity):
     def createSpecialAttackHitbox(self, target):
         self.specialAttack = True
         self.specialAttackTime = pygame.time.get_ticks()
-        specialAttack = SwarmSpellHitbox(self.hitbox.center, self.facingRight, target)
+        specialAttack = ProjectileSpellHitbox(self.hitbox.center, self.facingRight, target, 'swarm')
         self.specialAttackHitboxes.add(specialAttack)
 
     def getStatus(self):

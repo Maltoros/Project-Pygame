@@ -175,7 +175,6 @@ class Player(Entity):
             self.status = 'attack'
         elif self.casting:
             self.status = 'casting'
-            #morecode to end the game?
         else:
             if self.vel.y < 0:
                 self.status = 'jump'

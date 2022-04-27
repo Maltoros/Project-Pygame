@@ -30,9 +30,9 @@ def loadMap(path):
         game_map.append(list(row))
     return game_map
 STAGE = []
+STAGE.append(loadMap(os.path.join('Assets','levels','third_stage')))
 STAGE.append(loadMap(os.path.join('Assets','levels','first_stage')))
 STAGE.append(loadMap(os.path.join('Assets','levels','second_stage')))
-STAGE.append(loadMap(os.path.join('Assets','levels','third_stage')))
 
 
 #Screen Attributes
@@ -48,9 +48,9 @@ GRAVITY = 0.5
 
 #enemies
 enemyInformation = {
-    'greendude':{'size':(20, 31), 'hp':5, 'damage':3, 'speed':0.2,'mana':0,'chance':(8,9,10),'drops':['Small Life Potion','Medium Life Potion'], 'animations': {'idle':[],'run':[],'jump':[],'fall':[],'death':[],'attack':[]}},
-    'hunter':{'size':(17, 29), 'hp':3, 'damage':3, 'speed':0.25,'mana':0, 'chance':(7,8,9,10),'drops':['Small Life Potion','Medium Life Potion'], 'animations': {'idle':[],'run':[],'jump':[],'fall':[],'death':[],'attack':[]}},
-    'summoner':{'size':(17, 29), 'hp':3, 'damage':2, 'speed':0.25,'mana':9, 'chance':(6,7,8,9,10),'drops':['Small Life Potion','Medium Life Potion'], 'animations': {'idle':[],'run':[],'jump':[],'fall':[],'death':[],'casting':[]}},
+    'greendude':{'size':(20, 31), 'hp':5, 'damage':3, 'speed':0.2,'mana':0,'chance':(8,9,10), 'animations': {'idle':[],'run':[],'jump':[],'fall':[],'death':[],'attack':[]}},
+    'hunter':{'size':(17, 29), 'hp':3, 'damage':3, 'speed':0.25,'mana':0, 'chance':(7,8,9,10), 'animations': {'idle':[],'run':[],'jump':[],'fall':[],'death':[],'attack':[]}},
+    'summoner':{'size':(17, 29), 'hp':3, 'damage':2, 'speed':0.25,'mana':9, 'chance':(6,7,8,9,10), 'animations': {'idle':[],'run':[],'jump':[],'fall':[],'death':[],'casting':[]}},
     'swarm':{'size':(17, 16), 'hp':3, 'damage':2, 'speed':0.2,'mana':0, 'animations': {'idle':[], 'moving':[]}},
       }#hitboxsize, hp, damage, speed
 items = {
@@ -83,4 +83,4 @@ items = {
         'lifetime': False
         },
 }
-
+bossPositions = [(160, 176),(656,176),(400,240),(160,304),(656,304)]#

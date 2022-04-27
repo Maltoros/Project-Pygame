@@ -10,11 +10,10 @@ class Item(pygame.sprite.Sprite):
         self.spawnTime = pygame.time.get_ticks()
         self.lifeTime = items[self.itemType]['lifetime']
         self.image = pygame.image.load(path.join('Assets','potions', items[itemType]['image']+'.png')).convert_alpha()
-        self.rect = self.image.get_rect(center = pos)
+        self.rect = self.image.get_rect(topleft = pos)
         self.onGround = False
     
     def pickedUpBy(self, player):
-        print('acquired')
         if self.itemType == 'Big Life Potion':
             player.hp = player.maxHp
         if self.itemType == 'Medium Life Potion':

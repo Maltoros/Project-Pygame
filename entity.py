@@ -1,5 +1,4 @@
 import pygame
-from random import randint
 
 class Entity(pygame.sprite.Sprite):
     def __init__(self, surface):

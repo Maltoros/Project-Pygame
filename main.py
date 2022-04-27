@@ -3,9 +3,7 @@ from os import path
 from settings  import SCREENWIDTH, SCREENHEIGHT, STAGE, FPS
 from level import Level
 
-#Add more interatacble : (switches, chests ?)
-#Make 1-2 more levels
-#Make boss fight (?)
+#Add Victory Screen
 #Add Music and sound effects
 
 
@@ -22,6 +20,7 @@ class Game:
         self.running = True
         self.playing = False
         self.status = 'main menu'
+        self.trackMagic = False
 
         self.transitionTime = 0
         self.inTransition = False
@@ -37,8 +36,14 @@ class Game:
         self.level.setupLevel(STAGE[self.currentLevel])
 
     def runLevel(self): 
+        pygame.mouse.set_visible(False)
+        if self.trackMagic:
+                self.level.player.sprite.spellUnlock = self.trackMagic
+        else:
+            self.trackMagic = self.level.player.sprite.spellUnlock
         self.level.run() 
-        self.drawLevel()
+        self.displayWindow.blit(pygame.transform.scale(self.screen, self.displayWindow.get_size()), (0,0))
+        pygame.display.update()
 
     def events(self):
         player = self.level.player.sprite
@@ -69,6 +74,7 @@ class Game:
         surface.blit(textobj, textrect)
 
     def mainMenu(self):
+        pygame.mouse.set_visible(True)
         pos = list(pygame.mouse.get_pos())
         scaledPos = (pos[0] / 2, pos[1] / 2)
 
@@ -106,13 +112,9 @@ class Game:
         self.displayWindow.blit(pygame.transform.scale(self.screen, self.displayWindow.get_size()), (0,0))
         pygame.display.update()
 
-        
-
-    def drawLevel(self):
-        self.displayWindow.blit(pygame.transform.scale(self.screen, self.displayWindow.get_size()), (0,0))
-        pygame.display.update()
     
     def drawGameOverScreen(self):
+        pygame.mouse.set_visible(True)
         self.currentLevel = 0
         pos = list(pygame.mouse.get_pos())
         scaledPos = (pos[0] / 2, pos[1] / 2)
@@ -165,16 +167,15 @@ class Game:
                     self.transitionTime = pygame.time.get_ticks()
                     self.inTransition = True
                 return self.drawTransitionScreen()
+
             if not self.level.player.sprite.gameOver:
                 self.status = 'playing'
                 return self.runLevel()
             else:
                 self.status = 'game over'
+                self.trackMagic = False
                 return self.drawGameOverScreen()
             
-
-
-
     def run(self):
         while self.running:
             self.click = False
