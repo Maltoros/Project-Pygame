@@ -2,7 +2,7 @@ from ctypes.wintypes import MAX_PATH
 import pygame
 from os import path
 from hitbox import AttackHitbox, PlayerSpellHitbox
-from settings import GRAVITY, ACC, FRICTION, SCREENCENTER, importFolder
+from settings import GRAVITY, ACC, FRICTION, LASERBALLSOUND, PLAYERHITSOUND, SCREENCENTER, importFolder
 from entity import Entity
 
 class Player(Entity):
@@ -164,6 +164,7 @@ class Player(Entity):
             self.castTime = pygame.time.get_ticks()  
             self.mana -= 3
             spellHitbox = PlayerSpellHitbox(self.hitbox.center, self.facingRight, 'LaserBall')
+            LASERBALLSOUND.play(0)
             self.spellHitboxes.add(spellHitbox)
     
     def getStatus(self):
@@ -185,6 +186,16 @@ class Player(Entity):
                     self.status = 'run'
                 else:
                     self.status = 'idle'
+
+    def loseHP(self, damage):
+        if not self.hasIFrames and self.alive:
+            self.hit = True 
+            self.hasIFrames = True
+            self.hitTime = pygame.time.get_ticks()
+            self.hp -= damage
+            PLAYERHITSOUND.play(0)
+            if self.hp <= 0:
+                self.alive = False
 
     def update(self):
         self.inputs()

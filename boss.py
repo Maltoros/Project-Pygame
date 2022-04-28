@@ -1,6 +1,6 @@
 from turtle import pos, position
 import pygame
-from settings import importFolder, bossPositions
+from settings import BOSSTELEPORTINGSOUND, ENEMYHITSOUND, importFolder, bossPositions
 from random import randint
 from os import path
 
@@ -16,13 +16,15 @@ class Boss(pygame.sprite.Sprite):
         self.image = self.animations['idle'][self.frameIndex]
         self.rect = self.image.get_rect(center = pos)
         self.hitbox = pygame.Rect((0,0), (40, 50))
-        
+
+        self.canTakeAction = False
+        self.spawnTime = pygame.time.get_ticks()
         self.level = level
         self.defeated = False
         #stats
-        self.maxHp = 30
+        self.maxHp = 50
         self.hp = self.maxHp
-        self.specialDamage = 2
+        self.specialDamage = 3
 
         #status-gameplay
         self.facingRight = False
@@ -103,6 +105,10 @@ class Boss(pygame.sprite.Sprite):
             if currentTime - self.hitTime >= self.iFramesCD:
                 self.hasIFrames = False
 
+        if not self.canTakeAction:
+            if currentTime - self.spawnTime >= 1000:
+                self.canTakeAction = True
+
     def getStatus(self):
         if not self.alive:
             self.status = 'death'
@@ -131,11 +137,13 @@ class Boss(pygame.sprite.Sprite):
             self.hasIFrames = True
             self.hitTime = pygame.time.get_ticks()
             self.hp -= damage
+            ENEMYHITSOUND.play(0)
             if self.hp <= 0:
                 self.alive = False
 
     def changePosition(self):
         if self.canTeleport:
+            BOSSTELEPORTINGSOUND.play(0)
             self.teleportTime = pygame.time.get_ticks()
             self.teleporting = True
             newPosIndex = randint(0,4)
@@ -159,10 +167,11 @@ class Boss(pygame.sprite.Sprite):
         if not self.defeated:
             self.getStatus()
             self.animate()
-            self.changePosition()
             self.cooldowns()
-            if self.canSpecialAttack:
-                self.createSpecialAttackHitbox()
+            if self.canTakeAction:
+                self.changePosition()
+                if self.canSpecialAttack:
+                    self.createSpecialAttackHitbox()
 
 class BossSummon(pygame.sprite.Sprite):
     def __init__(self, spawnPosition, target):

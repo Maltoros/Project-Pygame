@@ -1,6 +1,6 @@
 import pygame
 from os import path
-from settings import items
+from settings import PICKUPPOTIONSOUND, items
 
 class Item(pygame.sprite.Sprite):
     def __init__(self, pos, itemType, surface):
@@ -42,7 +42,7 @@ class Item(pygame.sprite.Sprite):
         
         if self.itemType == 'Spell Unlock Potion':
             player.spellUnlock = True
-        
+        PICKUPPOTIONSOUND.play(0)
         self.kill()
 
     def drawing(self, scrolling):

@@ -1,6 +1,8 @@
 import pygame
 from os import path
 
+from settings import SWITCHSTATESOUND, UNLOCKPASSAGESOUND
+
 class Tile(pygame.sprite.Sprite):
     def __init__(self, pos, surface, imagename, breakable = False):#groups => sprite group it should be part of
         super().__init__()
@@ -33,6 +35,7 @@ class Switch(Tile):
 
     def switchState(self):
         if not self.hit:
+            SWITCHSTATESOUND.play(0)
             self.hit = True
             self.switchedTime = pygame.time.get_ticks()
             if not self.state:
@@ -61,6 +64,7 @@ class ActivatedTile(Tile):
         for switch in self.triggeringSwitches:
             triggers.append(switch.state)
         if all(triggers):
+            UNLOCKPASSAGESOUND.play(0)
             self.kill()
 
 class ExitLevel(Tile):

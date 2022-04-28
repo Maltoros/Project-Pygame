@@ -5,7 +5,8 @@ from boss import Boss
 from player import Player
 from enemy import Enemy
 from item import Item
-from settings import SCREENCENTER, TILESIZE, debug
+from settings import PLAYERHITSOUND, TILESIZE, debug
+
 
 class Level:
     def __init__(self, surface):
@@ -95,8 +96,8 @@ class Level:
     def bossUI(self):
         boss = self.boss.sprite
 
-        life = pygame.Rect(80, 350, boss.hp * 15, 10)
-        lifeBg = pygame.Rect(79, 349, 2+boss.maxHp * 15, 12)
+        life = pygame.Rect(55, 350, boss.hp * 10, 10)
+        lifeBg = pygame.Rect(54, 349, 2+boss.maxHp * 10, 12)
         pygame.draw.rect(self.displaySurface, 'black', lifeBg)
         pygame.draw.rect(self.displaySurface, 'red', life)
 

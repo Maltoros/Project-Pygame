@@ -1,5 +1,8 @@
 from os import walk
+from tkinter import FIRST
 import pygame, os
+pygame.mixer.init()
+
 
 #Debugging
 def debug(surface, info , x = 10, y = 40):
@@ -53,6 +56,7 @@ enemyInformation = {
     'summoner':{'size':(17, 29), 'hp':3, 'damage':2, 'speed':0.25,'mana':9, 'chance':(6,7,8,9,10), 'animations': {'idle':[],'run':[],'jump':[],'fall':[],'death':[],'casting':[]}},
     'swarm':{'size':(17, 16), 'hp':3, 'damage':2, 'speed':0.2,'mana':0, 'animations': {'idle':[], 'moving':[]}},
       }#hitboxsize, hp, damage, speed
+#Items
 items = {
     'Big Life Potion':{
         'image':'bigLifePotion',
@@ -83,4 +87,29 @@ items = {
         'lifetime': False
         },
 }
-bossPositions = [(160, 176),(656,176),(400,240),(160,304),(656,304)]#
+#Boss possible positions
+bossPositions = [(160, 176),(656,176),(400,240),(160,304),(656,304)]#TOPLEFT, TOPRIGHT, CENTER, BOTTOMLEFT, BOTTOMRIGHT
+
+#Soundeffects
+ENEMYHITSOUND = pygame.mixer.Sound(os.path.join('Assets','sound','sfx','enemyHit.wav'))
+ENEMYHITSOUND.set_volume(0.01)
+JUMPSOUND = pygame.mixer.Sound(os.path.join('Assets','sound','sfx','jumpSound.wav'))
+JUMPSOUND.set_volume(0.01)
+LASERBALLSOUND = pygame.mixer.Sound(os.path.join('Assets','sound','sfx','laserBallSound.wav'))
+LASERBALLSOUND.set_volume(0.1)
+PICKUPPOTIONSOUND = pygame.mixer.Sound(os.path.join('Assets','sound','sfx','pickUpPotion.wav'))
+PICKUPPOTIONSOUND.set_volume(0.2)
+PLAYERHITSOUND = pygame.mixer.Sound(os.path.join('Assets','sound','sfx','playerHit.wav'))
+PLAYERHITSOUND.set_volume(0.01)
+SWITCHSTATESOUND = pygame.mixer.Sound(os.path.join('Assets','sound','sfx', 'switchState.wav'))
+SWITCHSTATESOUND.set_volume(0.02)
+UNLOCKPASSAGESOUND = pygame.mixer.Sound(os.path.join('Assets','sound','sfx','unlockPassage.wav'))
+UNLOCKPASSAGESOUND.set_volume(0.02)
+BOSSTELEPORTINGSOUND = pygame.mixer.Sound(os.path.join('Assets','sound','sfx','bossTeleporting.wav'))
+BOSSTELEPORTINGSOUND.set_volume(0.02)
+
+#Music
+FIRSTLEVEL = os.path.join('Assets','sound','music','firstlevel.wav')
+SECONDLEVEL = os.path.join('Assets','sound','music','secondlevel.wav')
+THIRDLEVEL = os.path.join('Assets','sound','music','thirdlevel.wav')
+SOUNDTRACK = [FIRSTLEVEL, SECONDLEVEL, THIRDLEVEL]

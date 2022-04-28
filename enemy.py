@@ -2,7 +2,7 @@ import pygame
 from os import path
 from item import Item
 from random import randint
-from settings import importFolder, GRAVITY, FRICTION, enemyInformation
+from settings import ENEMYHITSOUND, importFolder, GRAVITY, FRICTION, enemyInformation
 from entity import Entity
 from hitbox import AttackHitbox, ProjectileSpellHitbox
 
@@ -227,6 +227,7 @@ class Enemy(Entity):
             self.hasIFrames = True
             self.hitTime = pygame.time.get_ticks()
             self.hp -= damage
+            ENEMYHITSOUND.play(0)
             if self.hp <= 0:
                 self.alive = False
                 self.dropReward()

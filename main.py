@@ -1,6 +1,6 @@
 import pygame
 from os import path
-from settings  import SCREENWIDTH, SCREENHEIGHT, STAGE, FPS
+from settings  import SCREENWIDTH, SCREENHEIGHT, SOUNDTRACK, STAGE, FPS
 from level import Level
 
 #Add Victory Screen
@@ -21,21 +21,25 @@ class Game:
         self.playing = False
         self.status = 'main menu'
         self.trackMagic = False
+        self.playMusicOnce = False
 
         self.transitionTime = 0
         self.inTransition = False
         self.currentLevel = 0
-
-        self.level = Level(self.screen)
-        self.level.setupLevel(STAGE[self.currentLevel])
+        self.loadLevel()
         self.font = pygame.font.Font(path.join('Assets','font','Silver.ttf'), 30)
         self.buttonColor = 'white'
     
     def loadLevel(self):
+        pygame.mixer.music.load(SOUNDTRACK[self.currentLevel])
+        pygame.mixer.music.set_volume(0.09)
         self.level = Level(self.screen)
         self.level.setupLevel(STAGE[self.currentLevel])
 
     def runLevel(self): 
+        if not self.playMusicOnce:
+            self.playMusicOnce = True
+            pygame.mixer.music.play()
         pygame.mouse.set_visible(False)
         if self.trackMagic:
                 self.level.player.sprite.spellUnlock = self.trackMagic
@@ -144,6 +148,8 @@ class Game:
         pygame.display.update()
 
     def drawTransitionScreen(self):
+        self.playMusicOnce = False
+        pygame.mixer.music.stop()
         currentTime = pygame.time.get_ticks()
         if currentTime - self.transitionTime >= 1000 and self.inTransition:
             self.currentLevel += 1

@@ -1,5 +1,7 @@
 import pygame
 
+from settings import JUMPSOUND
+
 class Entity(pygame.sprite.Sprite):
     def __init__(self, surface):
         super().__init__()
@@ -31,20 +33,13 @@ class Entity(pygame.sprite.Sprite):
 
     def jump(self):
         if self.canJump and self.onGround:
+            JUMPSOUND.play(0)
             self.vel.y = -10
             self.canJump = False
         elif self.canDoubleJump:
+            JUMPSOUND.play(0)
             self.vel.y = -10
             self.canDoubleJump = False
-
-    def loseHP(self, damage):
-        if not self.hasIFrames and self.alive:
-            self.hit = True 
-            self.hasIFrames = True
-            self.hitTime = pygame.time.get_ticks()
-            self.hp -= damage
-            if self.hp <= 0:
-                self.alive = False
 
     def drawing(self, scrolling):
         x = int(self.rect.x - scrolling.x)
