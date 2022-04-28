@@ -32,7 +32,7 @@ class Game:
     
     def loadLevel(self):
         pygame.mixer.music.load(SOUNDTRACK[self.currentLevel])
-        pygame.mixer.music.set_volume(0.09)
+        pygame.mixer.music.set_volume(0.05)
         self.level = Level(self.screen)
         self.level.setupLevel(STAGE[self.currentLevel])
 
