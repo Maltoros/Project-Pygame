@@ -1,6 +1,5 @@
 import pygame
 from os import path
-
 from settings import SWITCHSTATESOUND, UNLOCKPASSAGESOUND
 
 class Tile(pygame.sprite.Sprite):
@@ -16,14 +15,11 @@ class Tile(pygame.sprite.Sprite):
         y = int(self.rect.y - scrolling.y)
         self.displaySurface.blit(self.image, (x, y))
 
-    def update(self):
-        pass
-
 class TrapTile(Tile):
     def __init__(self, pos, surface, imagename, breakable = False):
         super().__init__(pos, surface, imagename, breakable)
         self.damage = 3
-        self.hitbox = pygame.Rect(pos[0], pos[1]-5, 16, 11)
+        self.hitbox = pygame.Rect(pos[0], pos[1]+5, 16, 11)
 
 class Switch(Tile):
     def __init__(self, pos, surface, imagename, breakable = False):
@@ -66,10 +62,6 @@ class ActivatedTile(Tile):
         if all(triggers):
             UNLOCKPASSAGESOUND.play(0)
             self.kill()
-
-class ExitLevel(Tile):
-   def __init__(self, pos, surface, imagename, breakable = False):
-        super().__init__(pos, surface, imagename, breakable)
 
          
 

@@ -1,4 +1,3 @@
-from turtle import pos, position
 import pygame
 from settings import BOSSTELEPORTINGSOUND, ENEMYHITSOUND, importFolder, bossPositions
 from random import randint

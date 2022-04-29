@@ -1,32 +1,40 @@
 import pygame
 from os import path
-from tile import ActivatedTile, ExitLevel, Switch, Tile, TrapTile
+from tile import ActivatedTile, Switch, Tile, TrapTile
 from boss import Boss
 from player import Player
 from enemy import Enemy
 from item import Item
-from settings import PLAYERHITSOUND, TILESIZE, debug
+from settings import TILESIZE
 
 
 class Level:
     def __init__(self, surface):
+        #Display
         self.displaySurface = surface
-        self.tiles = pygame.sprite.Group()
-        self.switches = pygame.sprite.Group()
-        self.levelExit = pygame.sprite.Group()
-        self.traps = pygame.sprite.Group()
-        self.items = pygame.sprite.Group()
-        self.enemies = pygame.sprite.Group()
-        self.player = pygame.sprite.GroupSingle()
-        self.boss = pygame.sprite.GroupSingle()
         self.scrolling = pygame.math.Vector2(0, 0)
         self.background = pygame.transform.scale(pygame.image.load(path.join('Assets','background','0.png')),(600, 400))
+
+        #Groups
+        self.player = pygame.sprite.GroupSingle()
+        self.boss = pygame.sprite.GroupSingle()
+        self.enemies = pygame.sprite.Group()
+
+        self.tiles = pygame.sprite.Group()
+        self.traps = pygame.sprite.Group()
+        self.switches = pygame.sprite.Group()
+        self.levelExit = pygame.sprite.Group()
+
+        self.items = pygame.sprite.Group()
+        
 
     def setupLevel(self, layout):
         for rowIndex, row in enumerate(layout):
             for colIndex, cell in enumerate(row):
                 x = colIndex * TILESIZE
                 y = rowIndex * TILESIZE
+            
+                #Level Tiles
                 if cell == '1':
                     tile = Tile((x, y), self.displaySurface, 'brick')
                     self.tiles.add(tile)
@@ -44,24 +52,21 @@ class Level:
                 if cell == 'T':
                     trap = TrapTile((x, y), self.displaySurface, 'spikeUp')
                     self.traps.add(trap)
-
                 if cell == 'Q':
                     switch = Switch((x, y), self.displaySurface, 'switchOff')
                     self.switches.add(switch)
-
-
                 if cell in ('L','E'):
                     if cell == 'E':
                         image = 'exitTop'
                     else:
                         image = 'exitBottom'     
-                    levelExitTile = ExitLevel((x, y), self.displaySurface, image)
+                    levelExitTile = Tile((x, y), self.displaySurface, image)
                     self.levelExit.add(levelExitTile)
-
-                if cell == 'A': # To be some kind of door asset
+                if cell == 'A': 
                     activableTile = ActivatedTile((x, y,), self.displaySurface, 'bridge', self.switches)
                     self.tiles.add(activableTile)
 
+                #Items and Entities
                 if cell == 'M':
                     itemSprite = Item((x, y), 'Spell Unlock Potion', self.displaySurface)
                     self.items.add(itemSprite)
@@ -80,16 +85,19 @@ class Level:
                 if cell =='B':
                     bossSprite = Boss((x, y), self.displaySurface, self)
                     self.boss.add(bossSprite)
+  
     def playerUI(self):
         player = self.player.sprite
 
         life = pygame.Rect(10, 10, player.hp * 7, 10)
         lifeBg = pygame.Rect(9, 9, 2 + player.maxHp * 7, 12)
+
         pygame.draw.rect(self.displaySurface, 'black', lifeBg)
         pygame.draw.rect(self.displaySurface, 'red', life)
         if player.spellUnlock:
             mana = pygame.Rect(10, 25, player.mana * 7, 10)
             manaBg = pygame.Rect(9, 24, 2 + player.maxMana * 7, 12)
+
             pygame.draw.rect(self.displaySurface, 'black', manaBg)
             pygame.draw.rect(self.displaySurface, 'blue', mana)   
 
@@ -98,6 +106,7 @@ class Level:
 
         life = pygame.Rect(55, 350, boss.hp * 10, 10)
         lifeBg = pygame.Rect(54, 349, 2+boss.maxHp * 10, 12)
+
         pygame.draw.rect(self.displaySurface, 'black', lifeBg)
         pygame.draw.rect(self.displaySurface, 'red', life)
 
@@ -137,7 +146,7 @@ class Level:
         if entity.onCeilling and entity.vel.y > 0:
             entity.OnCeilling = False
     
-    def checkCollision(self):
+    def checkPlayerCollisions(self):
         player = self.player.sprite
         attackHitboxes = player.attackHitboxes
         spellHitboxes = player.spellHitboxes
@@ -170,22 +179,29 @@ class Level:
                         if spellHitbox.rect.colliderect(self.boss.sprite.hitbox) and self.boss.sprite.alive:
                             spellHitbox.kill()
                             self.boss.sprite.loseHP(player.magicDamage)
+
+    def checkEnvironmentCollisions(self):
+        player = self.player.sprite        
+        #Handling level assets collision with player
         if self.items:
             for item in self.items:
                 if player.hitbox.colliderect(item.rect):
                     item.pickedUpBy(player)
 
         #traps
-        for trap in self.traps:
-            if self.player.sprite.hitbox.colliderect(trap.hitbox):
-                self.player.sprite.loseHP(3)
+        if self.traps:
+            for trap in self.traps:
+                if self.player.sprite.hitbox.colliderect(trap.hitbox):
+                    self.player.sprite.loseHP(trap.damage)
 
         #exit
         for levelExit in self.levelExit:
             if self.player.sprite.hitbox.colliderect(levelExit.rect):
                 self.player.sprite.completedLevel = True
 
-        #enemies colliding with the player
+    def checkEnemiesCollisions(self):
+        player = self.player.sprite 
+        #Enemies
         for enemy in self.enemies:
             xOffset = player.hitbox.centerx - enemy.hitbox.centerx
             if enemy.hit == False and enemy.alive:
@@ -196,7 +212,6 @@ class Level:
                     else:
                         player.vel += pygame.math.Vector2(-5, -2)
     
-        
             if enemy.attackHitboxes:
                 for attack in enemy.attackHitboxes:
                     if attack.rect.colliderect(player.hitbox):
@@ -220,19 +235,13 @@ class Level:
         self.scrolling.x += int(self.player.sprite.hitbox.centerx - self.scrolling.x - 305)
         self.scrolling.y += int(self.player.sprite.hitbox.centery - self.scrolling.y - 208)
     
-    def run(self):
-        self.displaySurface.fill((128, 115, 112))
-        self.displaySurface.blit(self.background, (0, 0))
-        #camera
-        self.worldscrolling()
-
-        #items
+    def handleEnvironment(self):
+        #Drawing and updates
         for item in self.items:
             item.drawing(self.scrolling)
             item.update()
             if pygame.sprite.spritecollide(item, self.tiles, False):
                 item.onGround = True
-        #level tiles
         for tile in self.tiles:
             tile.drawing(self.scrolling)
             tile.update()
@@ -246,22 +255,12 @@ class Level:
 
         for exitTile in self.levelExit:
             exitTile.drawing(self.scrolling)
-
-        #player
-        self.player.update()
-        self.player.sprite.drawing(self.scrolling)
-        self.horizontalMoveCollision(self.player.sprite)
-        self.verticalMoveCollision(self.player.sprite)
-        self.checkCollision()
-        self.playerUI()
-
-        #magic
-        for spell in self.player.sprite.spellHitboxes:
-            spell.drawing(self.displaySurface, self.scrolling)
-            spell.update()
-
-
-        #enemies
+        
+        #Collision
+        self.checkEnvironmentCollisions()
+    
+    def handleEnemies(self):
+        #Drawing and updates
         for enemy in self.enemies:
             enemy.update()
             enemy.drawing(self.scrolling)
@@ -272,6 +271,7 @@ class Level:
                 for spell in enemy.specialAttackHitboxes:
                     spell.drawing(self.displaySurface, self.scrolling)
                     spell.update()
+
         if self.boss:
             self.boss.update()
             self.boss.sprite.drawing(self.scrolling)
@@ -279,8 +279,41 @@ class Level:
             for spell in self.boss.sprite.specialAttackHitboxes:
                 spell.drawing(self.displaySurface, self.scrolling)
                 spell.update()
+        
+        #Collisions
+        self.checkEnemiesCollisions()
+    
+    def handlePlayer(self):
+        self.player.update()
+        self.player.sprite.drawing(self.scrolling)
+        self.horizontalMoveCollision(self.player.sprite)
+        self.verticalMoveCollision(self.player.sprite)
+        self.playerUI()
 
-        #debugging
+        #magic
+        for spell in self.player.sprite.spellHitboxes:
+            spell.drawing(self.displaySurface, self.scrolling)
+            spell.update()
+
+        #Collisions
+        self.checkPlayerCollisions()
+
+    def run(self):
+
+        #Setting the display and camera
+        self.displaySurface.fill((128, 115, 112))
+        self.displaySurface.blit(self.background, (0, 0))
+        self.worldscrolling()
+        
+        #Drawing sprites and handling logic  
+        self.handleEnvironment()
+        self.handlePlayer()
+        self.handleEnemies()
+        
+
+
+
+
 
 
     

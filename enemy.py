@@ -28,7 +28,8 @@ class Enemy(Entity):
         self.attackDuration = 200
         self.attackCD = 500
         self.attackTime = 0
-        #special attack/magic
+
+        #special attack
         self.specialAttackHitboxes = pygame.sprite.Group()
         self.canSpecialAttack = True
         self.specialAttack = False
@@ -76,7 +77,7 @@ class Enemy(Entity):
         #set the rect
         self.rect.midbottom = self.hitbox.midbottom    
 
-    def moving(self):
+    def handlingPlayerBehavior(self):
         #apply gravity
         self.acc = pygame.math.Vector2(0, GRAVITY)
         player = self.level.player.sprite
@@ -91,52 +92,11 @@ class Enemy(Entity):
                 #separate melee enemies behaviours
                 if yOffset < 15:
                     if self.archetype in ('hunter', 'greendude'):
-                        if xOffset > 0:
-                            self.facingRight = True
-                            self.acc.x = self.monsterAcc
-                        elif xOffset < 0:
-                            self.facingRight = False
-                            self.acc.x = -self.monsterAcc
+                        self.meleeEnemiesBehavior(xOffset, yOffset)
 
-                        #hunter 
-                        if self.archetype == 'hunter':
-                            #attacking and creating hitbox when in 30pixels
-                            if abs(xOffset) < 30:
-                                self.acc.x = 0
-                            if abs(xOffset) < 40 and self.canAttack:
-                                self.attackTime = pygame.time.get_ticks()
-                                self.attacking = True
-                                if self.facingRight:
-                                    vec1 = pygame.math.Vector2(8, -30)
-                                else:
-                                    vec1 = pygame.math.Vector2(-25, -30)
-                                attackHitbox = AttackHitbox(pygame.Rect((0, 0), (24, 30)), self.hitbox.midbottom + vec1)
-                                self.attackHitboxes.add(attackHitbox)
-
-                        elif self.archetype == 'greendude':
-                            #uses colliding hitbox to damage the enemy
-                            if abs(xOffset) < 30 and self.canAttack:
-                                self.attacking = True
-                            elif abs(xOffset) < 15 and abs(yOffset) < 15:
-                                self.acc.x = 0
-
-                                
                     elif self.archetype == 'summoner':
-                            if xOffset > 0:
-                                self.facingRight = True
-                            else:
-                                self.facingRight = False
-                        
-                            if 100 > xOffset > 0 and not self.onRight:
-                                    self.vel.x += -0.2
-
-                            elif -100 <= xOffset < 0 and not self.onLeft:
-                                    self.vel.x += 0.2
-
-                            if 300 > abs(xOffset) > 40 and self.canSpecialAttack:
-                                self.createSpecialAttackHitbox(player.hitbox.midtop)
-                                
-
+                        self.summonerBehavior(xOffset)                                
+            #Adding knockback when hit by the player
             if self.hit:
                 if xOffset > 0:
                     self.vel.x = -3
@@ -148,6 +108,52 @@ class Enemy(Entity):
         self.acc.x += self.vel.x * FRICTION
         #equations of motion
         self.vel += self.acc
+
+    def meleeEnemiesBehavior(self, xOffset, yOffset):  
+        if xOffset > 0:
+            self.facingRight = True
+            self.acc.x = self.monsterAcc
+        elif xOffset < 0:
+            self.facingRight = False
+            self.acc.x = -self.monsterAcc
+
+        #hunter 
+        if self.archetype == 'hunter':
+            #attacking and creating hitbox when in 30pixels
+            if abs(xOffset) < 30:
+                self.acc.x = 0
+            if abs(xOffset) < 40 and self.canAttack:
+                self.attackTime = pygame.time.get_ticks()
+                self.attacking = True
+                if self.facingRight:
+                    vec1 = pygame.math.Vector2(8, -30)
+                else:
+                    vec1 = pygame.math.Vector2(-25, -30)
+                attackHitbox = AttackHitbox(pygame.Rect((0, 0), (24, 30)), self.hitbox.midbottom + vec1)
+                self.attackHitboxes.add(attackHitbox)
+
+        elif self.archetype == 'greendude':
+            #uses colliding hitbox to damage the enemy
+            if abs(xOffset) < 30 and self.canAttack:
+                self.attacking = True
+            elif abs(xOffset) < 15 and abs(yOffset) < 15:
+                self.acc.x = 0
+
+    def summonerBehavior(self, xOffset):
+        player = self.level.player.sprite   
+        if xOffset > 0:
+            self.facingRight = True
+        else:
+            self.facingRight = False
+    
+        if 100 > xOffset > 0 and not self.onRight:
+                self.vel.x += -0.2
+
+        elif -100 <= xOffset < 0 and not self.onLeft:
+                self.vel.x += 0.2
+
+        if 300 > abs(xOffset) > 40 and self.canSpecialAttack:
+            self.createSpecialAttackHitbox(player.hitbox.midtop)
 
     def createSpecialAttackHitbox(self, target):
         self.specialAttack = True
@@ -233,7 +239,7 @@ class Enemy(Entity):
                 self.dropReward()
 
     def update(self):
-        self.moving()
+        self.handlingPlayerBehavior()
         self.getStatus()
         self.animate()
         self.cooldowns()

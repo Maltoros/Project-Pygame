@@ -1,5 +1,4 @@
 import pygame
-
 from settings import JUMPSOUND
 
 class Entity(pygame.sprite.Sprite):

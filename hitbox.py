@@ -1,4 +1,3 @@
-from distutils.spawn import spawn
 import pygame
 from os import path
 from settings import importFolder

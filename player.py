@@ -2,7 +2,7 @@ from ctypes.wintypes import MAX_PATH
 import pygame
 from os import path
 from hitbox import AttackHitbox, PlayerSpellHitbox
-from settings import GRAVITY, ACC, FRICTION, LASERBALLSOUND, PLAYERHITSOUND, SCREENCENTER, importFolder
+from settings import GRAVITY, ACC, FRICTION, LASERBALLSOUND, PLAYERDYINGSOUND, PLAYERHITSOUND, SCREENCENTER, importFolder
 from entity import Entity
 
 class Player(Entity):
@@ -195,6 +195,7 @@ class Player(Entity):
             self.hp -= damage
             PLAYERHITSOUND.play(0)
             if self.hp <= 0:
+                PLAYERDYINGSOUND.play(0)
                 self.alive = False
 
     def update(self):
