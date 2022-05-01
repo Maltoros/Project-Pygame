@@ -9,9 +9,10 @@ class Game:
     def __init__(self):
         pygame.init()
         pygame.font.init()
+        self.clock = pygame.time.Clock()
 
         #Display
-        self.clock = pygame.time.Clock()
+        pygame.display.set_icon(pygame.image.load(path.join('Assets','gameIcon.png')))
         pygame.display.set_caption('Metroidvania final project')
         self.displayWindow = pygame.display.set_mode((SCREENWIDTH * 2, SCREENHEIGHT * 2))
         self.screen = pygame.Surface((SCREENWIDTH, SCREENHEIGHT))
